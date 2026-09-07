@@ -6,11 +6,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/demoghost/demoghost.git"
+    "url": "git+https://github.com/irontoreofficial/demoghost.git"
   },
-  "homepage": "https://demoghost.dev/",
+  "homepage": "https://irontoreofficial.github.io/demoghost/",
   "bugs": {
-    "url": "https://github.com/demoghost/demoghost/issues"
+    "url": "https://github.com/irontoreofficial/demoghost/issues"
   },
   "engines": {
     "node": ">=18"

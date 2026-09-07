@@ -13,9 +13,9 @@
 [![npm version](https://img.shields.io/npm/v/demoghost.svg?style=flat-square&color=6366f1)](https://www.npmjs.com/package/demoghost)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/demoghost?style=flat-square&color=34d399)](https://bundlephobia.com/package/demoghost)
-[![CI](https://img.shields.io/github/actions/workflow/status/demoghost/demoghost/ci.yml?branch=main&style=flat-square)](https://github.com/demoghost/demoghost/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/irontoreofficial/demoghost/ci.yml?branch=master&style=flat-square)](https://github.com/irontoreofficial/demoghost/actions)
 
-[Live Website & Playground](https://demoghost.dev) • [Documentation](https://demoghost.dev/#docs) • [Report Bug](https://github.com/demoghost/demoghost/issues)
+[Live Website & Playground](https://demoghost.dev) • [Documentation](https://demoghost.dev/#docs) • [Report Bug](https://github.com/irontoreofficial/demoghost/issues)
 
 </div>
 
