@@ -1,0 +1,57 @@
+{
+  "name": "demoghost",
+  "version": "1.0.0",
+  "description": "Your UI. On autopilot. Turn your UI into its own demo.",
+  "main": "./dist/demoghost.cjs",
+  "module": "./dist/demoghost.js",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/demoghost.min.js",
+  "jsdelivr": "./dist/demoghost.min.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/demoghost.js",
+      "require": "./dist/demoghost.cjs"
+    },
+    "./css": "./dist/demoghost.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "dependencies": {
+    "@demoghost/core": "workspace:*",
+    "@demoghost/recorder": "workspace:*",
+    "@demoghost/controls": "workspace:*"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "product-demo",
+    "interactive-demo",
+    "javascript-demo",
+    "ui-demo",
+    "website-demo",
+    "product-tour",
+    "demo-library",
+    "browser-demo",
+    "interactive-walkthrough",
+    "ui-automation",
+    "frontend",
+    "typescript"
+  ],
+  "author": "DemoGhost Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/demoghost/demoghost"
+  },
+  "bugs": {
+    "url": "https://github.com/demoghost/demoghost/issues"
+  },
+  "homepage": "https://demoghost.dev"
+}

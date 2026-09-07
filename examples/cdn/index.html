@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DemoGhost - Standalone CDN Example</title>
+    <link rel="stylesheet" href="../../packages/demoghost/dist/demoghost.css" />
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card-bg: rgba(30, 41, 59, 0.7);
+        --border: rgba(255, 255, 255, 0.12);
+        --text: #f8fafc;
+        --accent: #6366f1;
+      }
+      body {
+        margin: 0;
+        padding: 40px 20px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg) 75%);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .container {
+        width: 100%;
+        max-width: 600px;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .header h1 {
+        font-size: 28px;
+        margin-bottom: 8px;
+      }
+      .header p {
+        opacity: 0.7;
+        margin: 0;
+      }
+      .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 6px;
+        opacity: 0.9;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px 14px;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        color: white;
+        box-sizing: border-box;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      input:focus,
+      select:focus {
+        border-color: var(--accent);
+      }
+      .btn {
+        padding: 10px 18px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: white;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+      }
+      .btn-primary:hover {
+        filter: brightness(1.1);
+      }
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        margin-right: 8px;
+      }
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+      .project-list {
+        margin-top: 24px;
+        border-top: 1px solid var(--border);
+        padding-top: 16px;
+      }
+      .project-item {
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .badge {
+        font-size: 11px;
+        padding: 3px 8px;
+        background: rgba(99, 102, 241, 0.2);
+        color: #818cf8;
+        border-radius: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>DemoGhost Standalone CDN Demo</h1>
+        <p>Loaded directly via &lt;script src="demoghost.min.js"&gt;</p>
+        <div style="margin-top: 16px">
+          <button class="btn btn-primary" id="btn-run-demo">Play Demo Autopilot</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          "
+        >
+          <h2 style="font-size: 18px; margin: 0">Project Workspace</h2>
+          <button class="btn btn-secondary" id="new-project-btn">+ New Project</button>
+        </div>
+
+        <div
+          id="project-form"
+          style="
+            display: none;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+          "
+        >
+          <div class="form-group">
+            <label for="project-name">Project Name</label>
+            <input type="text" id="project-name" placeholder="e.g. Acme Website" />
+          </div>
+          <div class="form-group">
+            <label for="project-category">Category</label>
+            <select id="project-category">
+              <option value="saas">SaaS Application</option>
+              <option value="mobile">Mobile App</option>
+              <option value="ai">AI Product</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="create-project-btn">Create Project</button>
+        </div>
+
+        <div class="project-list" id="project-list">
+          <div class="project-item">
+            <span>DemoGhost Core Library</span>
+            <span class="badge">Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMOGHOST CDN SCRIPT -->
+    <script src="../../packages/demoghost/dist/demoghost.min.js"></script>
+
+    <script>
+      // DOM logic for the mock app
+      const newBtn = document.getElementById("new-project-btn");
+      const form = document.getElementById("project-form");
+      const nameInput = document.getElementById("project-name");
+      const catSelect = document.getElementById("project-category");
+      const createBtn = document.getElementById("create-project-btn");
+      const list = document.getElementById("project-list");
+      const runBtn = document.getElementById("btn-run-demo");
+
+      newBtn.addEventListener("click", () => {
+        form.style.display = "block";
+      });
+
+      createBtn.addEventListener("click", () => {
+        const name = nameInput.value || "Untitled Project";
+        const cat = catSelect.options[catSelect.selectedIndex].text;
+
+        const item = document.createElement("div");
+        item.className = "project-item";
+        item.id = "newly-created-project";
+        item.innerHTML = `
+        <span>${name} (${cat})</span>
+        <span class="badge">Created Just Now</span>
+      `;
+        list.appendChild(item);
+        form.style.display = "none";
+        nameInput.value = "";
+      });
+
+      // Run DemoGhost autoplay
+      runBtn.addEventListener("click", () => {
+        const demo = [
+          DemoGhost.click("#new-project-btn", { caption: "Click '+ New Project' to open form" }),
+          DemoGhost.wait(300),
+          DemoGhost.type("#project-name", "NextGen SaaS Platform", {
+            caption: "Enter your project title"
+          }),
+          DemoGhost.select("#project-category", "ai"),
+          DemoGhost.click("#create-project-btn", { caption: "Submit to create project" }),
+          DemoGhost.wait(400),
+          DemoGhost.highlight("#newly-created-project", { duration: 1500, style: "glow" }),
+          DemoGhost.caption({
+            title: "Success!",
+            text: "Your project is ready to launch on autopilot."
+          })
+        ];
+
+        DemoGhost.play(demo, {
+          theme: "dark",
+          controls: true
+        });
+      });
+    </script>
+  </body>
+</html>

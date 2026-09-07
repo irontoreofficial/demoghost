@@ -1,0 +1,35 @@
+{
+  "name": "@demoghost/angular",
+  "version": "1.0.0",
+  "description": "Official Angular adapter for DemoGhost",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "demoghost": "workspace:*"
+  },
+  "peerDependencies": {
+    "@angular/core": ">=16.0.0",
+    "rxjs": ">=7.0.0"
+  },
+  "devDependencies": {
+    "@angular/core": "^19.1.5",
+    "rxjs": "^7.8.1"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "author": "DemoGhost Team",
+  "license": "MIT"
+}

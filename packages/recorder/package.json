@@ -1,0 +1,33 @@
+{
+  "name": "@demoghost/recorder",
+  "version": "1.0.0",
+  "description": "Smart DOM interaction recorder with privacy masking and code export for DemoGhost (0 runtime dependencies)",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@demoghost/core": "workspace:*"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "recorder",
+    "ui-recorder",
+    "dom-recorder",
+    "interactive-demo"
+  ],
+  "author": "DemoGhost Team",
+  "license": "MIT"
+}

@@ -1,0 +1,29 @@
+name: Bug Report
+description: File a bug report to help us improve DemoGhost
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a bug!
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe what bug occurred.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide steps or code to reproduce.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: DemoGhost Version
+      placeholder: 1.0.0
+    validations:
+      required: true

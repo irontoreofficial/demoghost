@@ -1,0 +1,36 @@
+{
+  "name": "@demoghost/core",
+  "version": "1.0.0",
+  "description": "Core engine for DemoGhost - Your UI. On autopilot. (0 runtime dependencies)",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./css": "./dist/demoghost.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "product-demo",
+    "interactive-demo",
+    "javascript-demo",
+    "ui-demo",
+    "product-tour",
+    "ui-automation"
+  ],
+  "author": "DemoGhost Team",
+  "license": "MIT"
+}

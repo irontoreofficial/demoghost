@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO Primary Meta Tags -->
+    <title>DemoGhost — Open Source Interactive Product Demo Library</title>
+    <meta name="title" content="DemoGhost — Open Source Interactive Product Demo Library" />
+    <meta
+      name="description"
+      content="Create self-playing interactive product demos directly on your live UI with DemoGhost. Open source, framework agnostic and built for JavaScript, TypeScript, React, Vue and Angular."
+    />
+    <meta
+      name="keywords"
+      content="product-demo, interactive-demo, javascript-demo, ui-demo, website-demo, product-tour, demo-library, browser-demo, interactive-walkthrough, ui-automation, frontend, typescript"
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://demoghost.dev/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://demoghost.dev/" />
+    <meta property="og:title" content="DemoGhost — Your UI. On autopilot." />
+    <meta
+      property="og:description"
+      content="Turn your UI into its own demo. High-fidelity self-playing product walkthroughs with realistic cursor dynamics, smart record & replay, and zero dependencies."
+    />
+    <meta property="og:image" content="https://demoghost.dev/og-image.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://demoghost.dev/" />
+    <meta property="twitter:title" content="DemoGhost — Your UI. On autopilot." />
+    <meta
+      property="twitter:description"
+      content="Turn your UI into its own demo. High-fidelity self-playing product walkthroughs with realistic cursor dynamics, smart record & replay, and zero dependencies."
+    />
+    <meta property="twitter:image" content="https://demoghost.dev/og-image.png" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "DemoGhost",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "All",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "description": "Open source JavaScript/TypeScript library for self-playing live interactive UI product demos.",
+        "url": "https://demoghost.dev",
+        "license": "https://opensource.org/licenses/MIT"
+      }
+    </script>
+  </head>
+  <body>
+    <!-- TOP NAVBAR -->
+    <nav class="navbar glass-panel">
+      <a href="#" class="brand">
+        <div class="brand-icon">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            stroke-width="2"
+          >
+            <path
+              d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87c.45 0 .67-.54.35-.85L6.35 2.86a.5.5 0 0 0-.85.35Z"
+            />
+          </svg>
+        </div>
+        <span>DemoGhost</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="#playground" class="nav-link" id="nav-playground">Playground</a>
+        <a href="#recorder" class="nav-link" id="nav-recorder">Recorder</a>
+        <a href="#docs" class="nav-link" id="nav-docs">Documentation</a>
+        <a
+          href="https://github.com/demoghost/demoghost"
+          target="_blank"
+          class="nav-link"
+          rel="noreferrer"
+          >GitHub</a
+        >
+        <button type="button" class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle theme">
+          DARK
+        </button>
+      </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="hero">
+      <div class="glass-pill hero-pill">
+        <span>✨ Version 1.0 is here</span>
+        <span>•</span>
+        <span>Zero Runtime Dependencies</span>
+      </div>
+
+      <h1 class="hero-title">Your UI. On autopilot.</h1>
+      <p class="hero-subtitle">
+        Turn your UI into its own demo. High-fidelity self-playing product walkthroughs directly on
+        your live DOM.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#docs" class="btn btn-primary" id="btn-get-started">Get Started</a>
+        <button type="button" class="btn btn-watch" id="btn-watch-demoghost">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Watch DemoGhost
+        </button>
+        <a
+          href="https://github.com/demoghost/demoghost"
+          target="_blank"
+          class="btn btn-secondary"
+          rel="noreferrer"
+          >GitHub</a
+        >
+      </div>
+
+      <div class="install-box" id="install-cmd" title="Click to copy">
+        <span>$</span>
+        <code>npm install demoghost</code>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- SECTION 1: INTERACTIVE PLAYGROUND -->
+      <section id="playground" style="margin-bottom: 80px">
+        <div class="section-header">
+          <h2>Interactive Code Playground</h2>
+          <p>Edit scenario steps or choose a preset to watch DemoGhost navigate the live sandbox</p>
+        </div>
+
+        <div class="playground-layout">
+          <!-- Editor Left -->
+          <div class="editor-pane glass-panel">
+            <div class="pane-header">
+              <div style="display: flex; align-items: center; gap: 10px">
+                <span style="font-size: 13px; font-weight: 600">Scenario Preset:</span>
+                <select
+                  id="preset-select"
+                  class="dg-speed-select"
+                  style="padding: 6px 12px; font-size: 13px"
+                >
+                  <option value="create-project">Create Project</option>
+                  <option value="checkout">Checkout Flow</option>
+                  <option value="login">User Login</option>
+                  <option value="search">Search & Filter</option>
+                  <option value="mobile">Mobile Touch Demo</option>
+                </select>
+              </div>
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="btn-run-playground"
+                style="padding: 8px 18px; font-size: 13px"
+              >
+                ▶ Run Demo
+              </button>
+            </div>
+            <textarea id="code-editor" class="code-area" spellcheck="false"></textarea>
+          </div>
+
+          <!-- Sandbox Right -->
+          <div class="sandbox-pane glass-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+              <span style="font-size: 14px; font-weight: 700">Live Interactive Sandbox</span>
+              <span class="glass-pill" style="font-size: 11px">Sandbox UI Target</span>
+            </div>
+
+            <div class="mock-card">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 16px;
+                "
+              >
+                <span style="font-weight: 600; font-size: 15px">Projects Hub</span>
+                <button
+                  class="btn btn-secondary"
+                  id="pg-new-project-btn"
+                  style="padding: 6px 12px; font-size: 12px"
+                >
+                  + New Project
+                </button>
+              </div>
+
+              <!-- Modal / Form -->
+              <div
+                id="pg-modal"
+                style="
+                  display: none;
+                  padding: 16px;
+                  background: rgba(0, 0, 0, 0.3);
+                  border-radius: 8px;
+                  margin-bottom: 16px;
+                "
+              >
+                <div class="form-group">
+                  <label class="form-label" for="pg-project-name">Project Title</label>
+                  <input class="form-input" id="pg-project-name" placeholder="Enter title" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="pg-project-cat">Category</label>
+                  <select class="form-input" id="pg-project-cat">
+                    <option value="ai">Artificial Intelligence</option>
+                    <option value="cloud">Cloud Computing</option>
+                    <option value="mobile">Mobile Application</option>
+                  </select>
+                </div>
+                <button
+                  class="btn btn-primary"
+                  id="pg-submit-project"
+                  style="padding: 6px 14px; font-size: 12px"
+                >
+                  Create
+                </button>
+              </div>
+
+              <div
+                id="pg-active-project"
+                style="
+                  padding: 12px;
+                  background: rgba(255, 255, 255, 0.04);
+                  border-radius: 8px;
+                  font-size: 13px;
+                "
+              >
+                DemoGhost Core — Ready
+              </div>
+            </div>
+
+            <!-- Extra Elements for Presets -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px">
+              <div class="mock-card" style="margin-top: 0; padding: 14px">
+                <span class="form-label">Checkout / Promo</span>
+                <div style="display: flex; gap: 6px">
+                  <input
+                    class="form-input"
+                    id="pg-promo-code"
+                    placeholder="Code"
+                    style="font-size: 12px; padding: 6px 8px"
+                  />
+                  <button
+                    class="btn btn-secondary"
+                    id="pg-apply-promo"
+                    style="padding: 6px 10px; font-size: 12px"
+                  >
+                    Apply
+                  </button>
+                </div>
+                <div
+                  id="pg-discount-badge"
+                  style="margin-top: 8px; font-size: 11px; color: #818cf8"
+                >
+                  50% Discount Applied
+                </div>
+                <button
+                  class="btn btn-primary"
+                  id="pg-checkout-btn"
+                  style="margin-top: 8px; width: 100%; padding: 6px; font-size: 12px"
+                >
+                  Checkout
+                </button>
+              </div>
+
+              <div class="mock-card" style="margin-top: 0; padding: 14px">
+                <span class="form-label">Auth Gateway</span>
+                <input
+                  class="form-input"
+                  id="pg-login-email"
+                  placeholder="Email"
+                  style="font-size: 12px; padding: 6px 8px; margin-bottom: 6px"
+                />
+                <input
+                  class="form-input"
+                  type="password"
+                  id="pg-login-pass"
+                  placeholder="Password"
+                  style="font-size: 12px; padding: 6px 8px; margin-bottom: 6px"
+                />
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 11px;
+                    margin-bottom: 6px;
+                  "
+                >
+                  <input type="checkbox" id="pg-remember-me" />
+                  <label for="pg-remember-me">Remember</label>
+                </div>
+                <button
+                  class="btn btn-secondary"
+                  id="pg-login-submit"
+                  style="width: 100%; padding: 6px; font-size: 12px"
+                >
+                  Sign In
+                </button>
+                <div id="pg-auth-success" style="font-size: 11px; color: #34d399; margin-top: 4px">
+                  Authenticated
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: LIVE RECORDER PLAYGROUND -->
+      <section id="recorder" style="margin-bottom: 80px">
+        <div class="section-header">
+          <h2>Live Record & Replay Playground</h2>
+          <p>
+            Interact with the live UI, record your actions, and watch DemoGhost replay them
+            instantly
+          </p>
+        </div>
+
+        <div class="recorder-card glass-panel">
+          <div class="recorder-header">
+            <div style="display: flex; align-items: center; gap: 12px">
+              <div class="record-status-pill glass-panel">
+                <div class="record-dot" id="record-dot"></div>
+                <span id="record-status-text">Click "Start Recording" to capture your actions</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 10px">
+              <button class="btn btn-primary" id="btn-start-record">Start Recording</button>
+              <button
+                class="btn btn-secondary"
+                id="btn-stop-record"
+                style="display: none; background: #ef4444; color: white"
+              >
+                Stop Recording
+              </button>
+              <button class="btn btn-watch" id="btn-replay-record" disabled>
+                Replay Autopilot
+              </button>
+            </div>
+          </div>
+
+          <div class="recorder-grid">
+            <!-- Sandbox to interact with -->
+            <div>
+              <span style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 12px"
+                >Interactive Recording Canvas:</span
+              >
+              <div class="mock-card">
+                <div class="form-group">
+                  <label class="form-label" for="rec-name">Your Name</label>
+                  <input
+                    class="form-input"
+                    id="rec-name"
+                    data-demoghost-id="user-full-name"
+                    placeholder="John Doe"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="rec-role">Developer Role</label>
+                  <select class="form-input" id="rec-role">
+                    <option value="frontend">Frontend Engineer</option>
+                    <option value="architect">System Architect</option>
+                    <option value="founder">Technical Founder</option>
+                  </select>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px">
+                  <input type="checkbox" id="rec-newsletter" />
+                  <label for="rec-newsletter" style="font-size: 13px"
+                    >Subscribe to DemoGhost releases</label
+                  >
+                </div>
+                <button
+                  class="btn btn-primary"
+                  id="rec-submit"
+                  data-demoghost-id="submit-record-form"
+                >
+                  Save Profile
+                </button>
+              </div>
+            </div>
+
+            <!-- Generated TypeScript Code Output -->
+            <div>
+              <span style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 12px"
+                >Generated TypeScript Code:</span
+              >
+              <textarea
+                id="recorded-code"
+                class="code-area glass-panel"
+                readonly
+                placeholder="// Recorded actions will automatically serialize here as TypeScript code..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: COMPREHENSIVE DOCUMENTATION -->
+      <section id="docs" style="margin-bottom: 80px">
+        <div class="section-header">
+          <h2>Documentation & API Reference</h2>
+          <p>Comprehensive developer guides, framework adapters, and architecture specifications</p>
+        </div>
+
+        <div class="docs-layout">
+          <!-- Sidebar Navigation -->
+          <aside class="docs-sidebar glass-panel">
+            <input
+              type="search"
+              class="docs-search"
+              id="docs-search-input"
+              placeholder="Search documentation..."
+            />
+            <nav id="docs-nav"></nav>
+          </aside>
+
+          <!-- Markdown Viewer -->
+          <article class="docs-content glass-panel" id="docs-viewer"></article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>DemoGhost — Released under the MIT License. Crafted for the Open Source Community.</p>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

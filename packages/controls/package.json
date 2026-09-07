@@ -1,0 +1,34 @@
+{
+  "name": "@demoghost/controls",
+  "version": "1.0.0",
+  "description": "Liquid Glass floating playback HUD controls for DemoGhost (0 runtime dependencies)",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./css": "./dist/controls.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@demoghost/core": "workspace:*"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "controls",
+    "hud",
+    "liquid-glass",
+    "ui-controls"
+  ],
+  "author": "DemoGhost Team",
+  "license": "MIT"
+}
