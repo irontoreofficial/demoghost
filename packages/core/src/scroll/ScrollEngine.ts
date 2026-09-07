@@ -2,6 +2,8 @@ import { ScrollEngineInterface, ScrollConfig } from "../types";
 
 export class ScrollEngine implements ScrollEngineInterface {
   private config: ScrollConfig;
+  private activeScroll: { interval: ReturnType<typeof setInterval>; resolve: () => void } | null =
+    null;
 
   constructor(config: ScrollConfig = {}) {
     this.config = {
@@ -41,6 +43,8 @@ export class ScrollEngine implements ScrollEngineInterface {
       return;
     }
 
+    this.finishActiveScroll();
+
     // Measure start and wait for smooth scroll to finish or timeout
     const startY = window.scrollY;
     const startX = window.scrollX;
@@ -64,13 +68,25 @@ export class ScrollEngine implements ScrollEngineInterface {
 
         // If scroll position hasn't changed or reached target or max checks
         if ((currY === lastY && currX === lastX && checkCount > 2) || checkCount >= maxChecks) {
-          clearInterval(interval);
-          resolve();
+          this.finishActiveScroll();
         } else {
           lastY = currY;
           lastX = currX;
         }
       }, 30);
+      this.activeScroll = { interval, resolve };
     });
+  }
+
+  private finishActiveScroll(): void {
+    if (!this.activeScroll) return;
+    clearInterval(this.activeScroll.interval);
+    const resolve = this.activeScroll.resolve;
+    this.activeScroll = null;
+    resolve();
+  }
+
+  public destroy(): void {
+    this.finishActiveScroll();
   }
 }

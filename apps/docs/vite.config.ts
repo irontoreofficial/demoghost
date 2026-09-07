@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import path from "node:path";
 
 export default defineConfig({
+  base: process.env.BASE_URL || "./",
   resolve: {
     alias: {
       "demoghost/css": path.resolve(__dirname, "../../packages/demoghost/src/styles.css"),

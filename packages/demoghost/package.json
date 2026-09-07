@@ -11,17 +11,19 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/demoghost.js",
-      "require": "./dist/demoghost.cjs"
+      "require": "./dist/demoghost.cjs",
+      "default": "./dist/demoghost.js"
     },
-    "./css": "./dist/demoghost.css"
+    "./css": "./dist/demoghost.css",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"
   ],
   "sideEffects": [
-    "*.css"
+    "./dist/*.css"
   ],
-  "dependencies": {
+  "devDependencies": {
     "@demoghost/core": "workspace:*",
     "@demoghost/recorder": "workspace:*",
     "@demoghost/controls": "workspace:*"
@@ -46,12 +48,19 @@
   ],
   "author": "DemoGhost Team",
   "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/demoghost/demoghost"
+    "url": "git+https://github.com/demoghost/demoghost.git",
+    "directory": "packages/demoghost"
   },
   "bugs": {
     "url": "https://github.com/demoghost/demoghost/issues"
   },
-  "homepage": "https://demoghost.dev"
+  "homepage": "https://demoghost.dev/"
 }

@@ -29,6 +29,8 @@ export class PrivacyMasker {
     if (
       element.closest(".dg-cursor") ||
       element.closest(".dg-controls") ||
+      element.closest(".dg-controls-container") ||
+      element.closest(".dg-controls-hud") ||
       element.closest(".dg-caption") ||
       element.closest(".dg-spotlight-backdrop")
     ) {
@@ -55,28 +57,35 @@ export class PrivacyMasker {
     }
 
     // Name / autocomplete checks for sensitive fields
-    const name = (element.getAttribute("name") || "").toLowerCase();
-    const autocomplete = (element.getAttribute("autocomplete") || "").toLowerCase();
-    const placeholder = (element.getAttribute("placeholder") || "").toLowerCase();
+    const sensitiveText = ["name", "id", "autocomplete", "placeholder", "aria-label"]
+      .map(attribute => element.getAttribute(attribute) || "")
+      .join(" ")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "");
 
     const sensitiveKeywords = [
       "password",
       "secret",
       "creditcard",
       "cardnumber",
+      "ccnumber",
       "cvv",
       "cvc",
+      "csc",
+      "cccsc",
+      "securitycode",
+      "pin",
+      "passphrase",
       "ssn",
       "token",
-      "apikey"
+      "apikey",
+      "accesstoken",
+      "clientsecret",
+      "onetimecode"
     ];
 
     for (const keyword of sensitiveKeywords) {
-      if (
-        name.includes(keyword) ||
-        autocomplete.includes(keyword) ||
-        placeholder.includes(keyword)
-      ) {
+      if (sensitiveText.includes(keyword)) {
         return true;
       }
     }

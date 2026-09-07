@@ -118,8 +118,12 @@ export class DemoGhostControls {
     toggleBtn?.addEventListener("click", () => {
       if (this.controller.state === "playing") {
         this.controller.pause();
-      } else {
+      } else if (this.controller.state === "paused") {
         this.controller.resume();
+      } else if (this.controller.state === "idle") {
+        void this.controller.play();
+      } else {
+        void this.controller.restart();
       }
     });
     restartBtn?.addEventListener("click", () => this.controller.restart());
@@ -163,9 +167,10 @@ export class DemoGhostControls {
     };
 
     const onClose = () => {
-      this.destroy();
+      this.destroy(true);
     };
 
+    this.unsubs.push(this.controller.on("start", onStateChange));
     this.unsubs.push(this.controller.on("step:start", onStep));
     this.unsubs.push(this.controller.on("pause", onStateChange));
     this.unsubs.push(this.controller.on("resume", onStateChange));
@@ -173,18 +178,24 @@ export class DemoGhostControls {
     this.unsubs.push(this.controller.on("stop", onClose));
   }
 
-  public destroy(): void {
+  public destroy(immediate = false): void {
     this.unsubs.forEach(u => u());
     this.unsubs = [];
 
     if (this.rootElement && this.rootElement.parentNode) {
-      this.rootElement.classList.add("dg-controls-container--hidden");
-      setTimeout(() => {
-        if (this.rootElement && this.rootElement.parentNode) {
-          this.rootElement.parentNode.removeChild(this.rootElement);
-          this.rootElement = null;
-        }
-      }, 350);
+      if (immediate) {
+        this.rootElement.parentNode.removeChild(this.rootElement);
+        this.rootElement = null;
+      } else {
+        const el = this.rootElement;
+        el.classList.add("dg-controls-container--hidden");
+        setTimeout(() => {
+          if (el && el.parentNode) {
+            el.parentNode.removeChild(el);
+          }
+        }, 300);
+        this.rootElement = null;
+      }
     }
   }
 }

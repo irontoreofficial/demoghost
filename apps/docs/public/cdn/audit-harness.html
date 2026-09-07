@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DemoGhost Audit Harness</title>
+    <link rel="stylesheet" href="./demoghost.css" />
+    <style>
+      /* Aggressive Host Global Styles for Collision Testing */
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 20px;
+        background: #0f172a;
+        color: #f8fafc;
+      }
+      div {
+        margin-bottom: 8px;
+      }
+      button {
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+
+      /* High Z-index container */
+      .high-z-index-modal {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 10000;
+        background: #1e293b;
+        padding: 16px;
+        border: 1px solid #475569;
+        border-radius: 8px;
+      }
+
+      #large-dom-container {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Audit Harness</h1>
+
+    <div id="test-sandbox">
+      <button id="btn-normal">Normal Target</button>
+      <button id="btn-disappearing">Disappearing Target</button>
+      <div id="dynamic-target-slot"></div>
+    </div>
+
+    <div class="high-z-index-modal" id="modal-container">
+      <h3>Modal Overlay (z: 10000)</h3>
+      <button id="btn-in-modal">Modal Action</button>
+    </div>
+
+    <div id="large-dom-container"></div>
+
+    <script src="./demoghost.min.js"></script>
+    <script>
+      window.DemoGhostAudit = {
+        // 1. Memory Leak Test
+        async testPlayStopCycles(cycles = 5) {
+          for (let i = 0; i < cycles; i++) {
+            const ctrl = DemoGhost.play(
+              [DemoGhost.move("#btn-normal", 100), DemoGhost.click("#btn-normal")],
+              { controls: true }
+            );
+            await new Promise(r => setTimeout(r, 50));
+            ctrl.stop();
+          }
+          const cursors = document.querySelectorAll(".dg-cursor");
+          const huds = document.querySelectorAll(".dg-controls-hud");
+          return { cursorsCount: cursors.length, hudsCount: huds.length };
+        },
+
+        // 2. Multi-instance test
+        testConcurrentPlayback() {
+          const ctrl1 = DemoGhost.play([DemoGhost.move("#btn-normal", 1000)]);
+          const ctrl2 = DemoGhost.play([DemoGhost.click("#btn-normal")]);
+          const cursors = document.querySelectorAll(".dg-cursor");
+          return {
+            ctrl1State: ctrl1.state,
+            ctrl2State: ctrl2.state,
+            cursorsCount: cursors.length
+          };
+        },
+
+        // 3. Target removal mid-flight test
+        async testTargetRemoval() {
+          const btn = document.getElementById("btn-disappearing");
+          const ctrl = DemoGhost.play([
+            DemoGhost.move("#btn-disappearing", 200),
+            DemoGhost.click("#btn-disappearing")
+          ]);
+
+          // Remove element mid-flight
+          setTimeout(() => {
+            if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
+          }, 50);
+
+          try {
+            await ctrl.finished;
+            return { errorCaught: false };
+          } catch (err) {
+            return { errorCaught: true, errorName: err.name, errorMessage: err.message };
+          }
+        },
+
+        // 4. Dynamic Target insertion
+        async testDynamicTarget() {
+          const slot = document.getElementById("dynamic-target-slot");
+          slot.innerHTML = "";
+
+          setTimeout(() => {
+            const newBtn = document.createElement("button");
+            newBtn.id = "btn-dynamic-created";
+            newBtn.textContent = "Dynamically Added";
+            slot.appendChild(newBtn);
+          }, 200);
+
+          const ctrl = DemoGhost.play(
+            [DemoGhost.click({ selector: "#btn-dynamic-created", waitForTarget: 2000 })],
+            { controls: false }
+          );
+
+          await ctrl.finished;
+          return { success: true };
+        },
+
+        // 5. Large DOM stress test
+        generateLargeDom(count = 5000) {
+          const container = document.getElementById("large-dom-container");
+          container.innerHTML = "";
+          const fragment = document.createDocumentFragment();
+          for (let i = 0; i < count; i++) {
+            const el = document.createElement("div");
+            el.className = `node-item node-${i % 20}`;
+            el.textContent = `Node ${i}`;
+            fragment.appendChild(el);
+          }
+          container.appendChild(fragment);
+        }
+      };
+    </script>
+  </body>
+</html>

@@ -234,6 +234,8 @@ export interface ScrollConfig {
 
 export interface PlaybackOptions {
   speed?: number;
+  typingSpeed?: TypingSpeed;
+  defaultTimeout?: number;
   pointer?: PointerMode;
   cursor?: CursorConfig;
   scroll?: ScrollConfig;
@@ -255,7 +257,7 @@ export interface ActionExecutionContext {
   step: DemoStep;
   stepIndex: number;
   totalSteps: number;
-  targetResolver: TargetResolver;
+  targetResolver: TargetResolverInterface;
   cursor: CursorEngineInterface;
   scrollEngine: ScrollEngineInterface;
   spotlightEngine: SpotlightEngineInterface;
@@ -270,10 +272,12 @@ export interface ActionHandler {
   execute(context: ActionExecutionContext): Promise<void>;
 }
 
-export interface TargetResolver {
-  resolve(target: DemoTarget, stepIndex?: number): Promise<HTMLElement>;
-  resolveOptional(target: DemoTarget): Promise<HTMLElement | null>;
+export interface TargetResolverInterface {
+  resolve(target: DemoTarget, stepIndex?: number, signal?: AbortSignal): Promise<HTMLElement>;
+  resolveOptional(target: DemoTarget, signal?: AbortSignal): Promise<HTMLElement | null>;
 }
+
+export type TargetResolver = TargetResolverInterface;
 
 export interface CursorEngineInterface {
   moveTo(x: number, y: number, duration?: number): Promise<void>;
@@ -289,6 +293,7 @@ export interface CursorEngineInterface {
 export interface ScrollEngineInterface {
   scrollIntoView(element: HTMLElement, offset?: number): Promise<void>;
   scrollTo(x: number, y: number, behavior?: ScrollBehavior): Promise<void>;
+  destroy(): void;
 }
 
 export interface SpotlightEngineInterface {
@@ -315,7 +320,7 @@ export interface PlaybackEvents {
   "record:stop": { scenario: DemoScenario };
 }
 
-export interface PlaybackControllerInterface {
+export interface PlaybackControllerInterface extends PromiseLike<void> {
   readonly state: PlaybackState;
   readonly currentStep: number;
   readonly totalSteps: number;

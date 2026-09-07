@@ -12,6 +12,9 @@ export class CursorEngine implements CursorEngineInterface {
   private config: CursorConfig;
   private position: Point = { x: 100, y: 100 };
   private activeAnimation: number | null = null;
+  private activeAnimationResolve: (() => void) | null = null;
+  private pendingTimers = new Map<ReturnType<typeof setTimeout>, () => void>();
+  private ripples = new Set<HTMLElement>();
   private container: HTMLElement;
   private deterministic: boolean;
   private prefersReducedMotion = false;
@@ -94,6 +97,16 @@ export class CursorEngine implements CursorEngineInterface {
         `;
         break;
       case "classic":
+        this.element.innerHTML = `
+          <svg class="dg-cursor-svg" width="26" height="26" viewBox="0 0 24 24" fill="none">
+            <path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87c.45 0 .67-.54.35-.85L6.35 2.86a.5.5 0 0 0-.85.35Z" 
+              fill="var(--demoghost-cursor, #0f172a)" 
+              stroke="white" 
+              stroke-width="1.5" 
+              stroke-linejoin="round"/>
+          </svg>
+        `;
+        break;
       default:
         this.element.innerHTML = `
           <svg class="dg-cursor-svg" width="26" height="26" viewBox="0 0 24 24" fill="none">
@@ -109,10 +122,7 @@ export class CursorEngine implements CursorEngineInterface {
   }
 
   public async moveTo(x: number, y: number, duration = 600): Promise<void> {
-    if (this.activeAnimation) {
-      cancelAnimationFrame(this.activeAnimation);
-      this.activeAnimation = null;
-    }
+    this.finishActiveAnimation();
 
     const start = { ...this.position };
     const end = { x, y };
@@ -122,9 +132,12 @@ export class CursorEngine implements CursorEngineInterface {
       return;
     }
 
-    const [cp1, cp2] = generateNaturalTrajectory(start, end, this.deterministic);
+    const trajectory = generateNaturalTrajectory(start, end, this.deterministic);
+    const cp1 = trajectory[0];
+    const cp2 = trajectory[1];
 
     return new Promise<void>(resolve => {
+      this.activeAnimationResolve = resolve;
       const startTime = performance.now();
 
       const step = (now: number) => {
@@ -140,6 +153,7 @@ export class CursorEngine implements CursorEngineInterface {
         } else {
           this.updatePosition(end);
           this.activeAnimation = null;
+          this.activeAnimationResolve = null;
           resolve();
         }
       };
@@ -154,7 +168,7 @@ export class CursorEngine implements CursorEngineInterface {
     this.element.classList.add("dg-cursor--active");
     this.createRipple();
 
-    await new Promise(r => setTimeout(r, 120));
+    await this.wait(120);
     if (this.element) {
       this.element.classList.remove("dg-cursor--active");
     }
@@ -162,7 +176,7 @@ export class CursorEngine implements CursorEngineInterface {
 
   public async doubleClick(): Promise<void> {
     await this.click();
-    await new Promise(r => setTimeout(r, 80));
+    await this.wait(80);
     await this.click();
   }
 
@@ -174,12 +188,38 @@ export class CursorEngine implements CursorEngineInterface {
     ripple.style.left = `${this.position.x}px`;
     ripple.style.top = `${this.position.y}px`;
     this.container.appendChild(ripple);
+    this.ripples.add(ripple);
 
-    setTimeout(() => {
-      if (ripple.parentNode) {
-        ripple.parentNode.removeChild(ripple);
-      }
-    }, 600);
+    this.schedule(600, () => this.removeRipple(ripple));
+  }
+
+  private wait(duration: number): Promise<void> {
+    return new Promise(resolve => this.schedule(duration, resolve));
+  }
+
+  private schedule(duration: number, callback: () => void): void {
+    const timer = setTimeout(() => {
+      this.pendingTimers.delete(timer);
+      callback();
+    }, duration);
+    this.pendingTimers.set(timer, callback);
+  }
+
+  private removeRipple(ripple: HTMLElement): void {
+    ripple.remove();
+    this.ripples.delete(ripple);
+  }
+
+  private finishActiveAnimation(): void {
+    if (this.activeAnimation !== null) {
+      cancelAnimationFrame(this.activeAnimation);
+      this.activeAnimation = null;
+    }
+    if (this.activeAnimationResolve) {
+      const resolve = this.activeAnimationResolve;
+      this.activeAnimationResolve = null;
+      resolve();
+    }
   }
 
   public show(): void {
@@ -220,10 +260,14 @@ export class CursorEngine implements CursorEngineInterface {
   }
 
   public destroy(): void {
-    if (this.activeAnimation) {
-      cancelAnimationFrame(this.activeAnimation);
-      this.activeAnimation = null;
-    }
+    this.finishActiveAnimation();
+    this.pendingTimers.forEach((callback, timer) => {
+      clearTimeout(timer);
+      callback();
+    });
+    this.pendingTimers.clear();
+    for (const ripple of this.ripples) this.removeRipple(ripple);
+    this.ripples.clear();
     if (this.element && this.element.parentNode) {
       this.element.parentNode.removeChild(this.element);
       this.element = null;

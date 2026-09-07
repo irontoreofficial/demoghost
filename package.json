@@ -3,6 +3,18 @@
   "version": "1.0.0",
   "private": true,
   "description": "Your UI. On autopilot. Turn your UI into its own demo.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/demoghost/demoghost.git"
+  },
+  "homepage": "https://demoghost.dev/",
+  "bugs": {
+    "url": "https://github.com/demoghost/demoghost/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "type": "module",
   "packageManager": "pnpm@12.3.4",
   "scripts": {

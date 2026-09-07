@@ -2,6 +2,7 @@ export class AccessibilityManager {
   private liveRegion: HTMLElement | null = null;
   private previousActiveElement: HTMLElement | null = null;
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
+  private announcementTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.initLiveRegion();
@@ -39,7 +40,9 @@ export class AccessibilityManager {
     if (!this.liveRegion) return;
     // Clear and set to trigger speech synthesis in screen readers
     this.liveRegion.textContent = "";
-    setTimeout(() => {
+    if (this.announcementTimer) clearTimeout(this.announcementTimer);
+    this.announcementTimer = setTimeout(() => {
+      this.announcementTimer = null;
       if (this.liveRegion) {
         this.liveRegion.textContent = message;
       }
@@ -60,6 +63,10 @@ export class AccessibilityManager {
   }
 
   public destroy(): void {
+    if (this.announcementTimer) {
+      clearTimeout(this.announcementTimer);
+      this.announcementTimer = null;
+    }
     if (this.keydownHandler && typeof window !== "undefined") {
       window.removeEventListener("keydown", this.keydownHandler);
       this.keydownHandler = null;

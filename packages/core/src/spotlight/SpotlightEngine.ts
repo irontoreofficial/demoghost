@@ -6,6 +6,8 @@ export class SpotlightEngine implements SpotlightEngineInterface {
   private captionEl: HTMLElement | null = null;
   private activeElement: HTMLElement | null = null;
   private activeStyle: string | null = null;
+  private activeTimer: ReturnType<typeof setTimeout> | null = null;
+  private activeTimerResolve: (() => void) | null = null;
 
   constructor(container?: HTMLElement) {
     this.container = container ?? (typeof document !== "undefined" ? document.body : (null as any));
@@ -32,7 +34,14 @@ export class SpotlightEngine implements SpotlightEngineInterface {
     }
 
     if (options.duration && options.duration > 0) {
-      await new Promise(r => setTimeout(r, options.duration));
+      await new Promise<void>(resolve => {
+        this.activeTimerResolve = resolve;
+        this.activeTimer = setTimeout(() => {
+          this.activeTimer = null;
+          this.activeTimerResolve = null;
+          resolve();
+        }, options.duration);
+      });
       this.clearHighlight();
     }
   }
@@ -150,6 +159,15 @@ export class SpotlightEngine implements SpotlightEngineInterface {
   }
 
   public destroy(): void {
+    if (this.activeTimer) {
+      clearTimeout(this.activeTimer);
+      this.activeTimer = null;
+    }
+    if (this.activeTimerResolve) {
+      const resolve = this.activeTimerResolve;
+      this.activeTimerResolve = null;
+      resolve();
+    }
     this.clearHighlight();
   }
 }

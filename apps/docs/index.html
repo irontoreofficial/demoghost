@@ -160,6 +160,7 @@
                 <select
                   id="preset-select"
                   class="dg-speed-select"
+                  aria-label="Select Demo Preset"
                   style="padding: 6px 12px; font-size: 13px"
                 >
                   <option value="create-project">Create Project</option>
@@ -178,7 +179,12 @@
                 ▶ Run Demo
               </button>
             </div>
-            <textarea id="code-editor" class="code-area" spellcheck="false"></textarea>
+            <textarea
+              id="code-editor"
+              class="code-area"
+              aria-label="DemoGhost Scenario Code Editor"
+              spellcheck="false"
+            ></textarea>
           </div>
 
           <!-- Sandbox Right -->
@@ -412,6 +418,7 @@
                 id="recorded-code"
                 class="code-area glass-panel"
                 readonly
+                aria-label="Generated TypeScript Code Output"
                 placeholder="// Recorded actions will automatically serialize here as TypeScript code..."
               ></textarea>
             </div>

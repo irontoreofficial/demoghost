@@ -8,8 +8,8 @@ export const THEME_PRESETS: Record<string, CustomTheme> = {
     border: "rgba(226, 232, 240, 0.8)",
     text: "#0f172a",
     shadow: "0 20px 40px -15px rgba(0, 0, 0, 0.08)",
-    zIndexCursor: 10000,
-    zIndexOverlay: 9990
+    zIndexCursor: 999999,
+    zIndexOverlay: 999990
   },
   dark: {
     accent: "#818cf8",
@@ -18,8 +18,8 @@ export const THEME_PRESETS: Record<string, CustomTheme> = {
     border: "rgba(255, 255, 255, 0.12)",
     text: "#f8fafc",
     shadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
-    zIndexCursor: 10000,
-    zIndexOverlay: 9990
+    zIndexCursor: 999999,
+    zIndexOverlay: 999990
   },
   glass: {
     accent: "#6366f1",
@@ -28,8 +28,8 @@ export const THEME_PRESETS: Record<string, CustomTheme> = {
     border: "rgba(255, 255, 255, 0.35)",
     text: "#0f172a",
     shadow: "0 20px 50px rgba(99, 102, 241, 0.15)",
-    zIndexCursor: 10000,
-    zIndexOverlay: 9990
+    zIndexCursor: 999999,
+    zIndexOverlay: 999990
   }
 };
 

@@ -28,6 +28,8 @@ export class PlaybackController implements PlaybackControllerInterface {
 
   private abortController: AbortController | null = null;
   private pauseResolver: (() => void) | null = null;
+  private runPromise: Promise<void> | null = null;
+  private enginesInitialized = false;
   private finishResolver!: () => void;
   private finishRejecter!: (err: any) => void;
   public finished: Promise<void>;
@@ -51,10 +53,8 @@ export class PlaybackController implements PlaybackControllerInterface {
     this.actionRegistry = actionRegistry;
     this.emitter = emitter || new EventEmitter<PlaybackEvents>();
 
-    this.finished = new Promise<void>((resolve, reject) => {
-      this.finishResolver = resolve;
-      this.finishRejecter = reject;
-    });
+    this.finished = Promise.resolve();
+    this.resetFinishedPromise();
 
     this.initEngines();
   }
@@ -62,9 +62,11 @@ export class PlaybackController implements PlaybackControllerInterface {
   private initEngines(): void {
     if (typeof window === "undefined") return;
 
+    if (this.enginesInitialized) this.cleanup();
+
     ThemeManager.apply(this.options.theme, this.options.container);
 
-    this.targetResolver = new TargetResolver(5000);
+    this.targetResolver = new TargetResolver(this.options.defaultTimeout ?? 5000);
     this.cursorEngine = new CursorEngine({
       pointerMode: this.options.pointer,
       cursor: this.options.cursor,
@@ -83,6 +85,17 @@ export class PlaybackController implements PlaybackControllerInterface {
         else if (this._state === "paused") this.resume();
       }
     });
+    this.enginesInitialized = true;
+  }
+
+  private resetFinishedPromise(): void {
+    this.finished = new Promise<void>((resolve, reject) => {
+      this.finishResolver = resolve;
+      this.finishRejecter = reject;
+    });
+    // Auto-start users may ignore `finished`; attaching a handler avoids an
+    // unhandled-rejection warning while preserving rejection for consumers.
+    void this.finished.catch(() => undefined);
   }
 
   public get state(): PlaybackState {
@@ -105,13 +118,22 @@ export class PlaybackController implements PlaybackControllerInterface {
     this._speed = Math.max(0.1, val);
   }
 
-  public async play(): Promise<void> {
-    if (this._state === "playing") return;
+  public play(): Promise<void> {
+    if (this._state === "playing") return this.runPromise ?? this.finished;
     if (this._state === "paused") {
       this.resume();
-      return;
+      return this.runPromise ?? this.finished;
     }
 
+    if (this._state === "completed" || this._state === "stopped" || this._state === "error") {
+      return this.restart();
+    }
+
+    this.runPromise = this.runPlayback();
+    return this.runPromise;
+  }
+
+  private async runPlayback(): Promise<void> {
     this._state = "playing";
     this.abortController = new AbortController();
     this.emitter.emit("start", { scenario: this.scenario });
@@ -136,11 +158,16 @@ export class PlaybackController implements PlaybackControllerInterface {
         this.finishResolver();
       }
     } catch (err: any) {
+      if (this.abortController?.signal.aborted) {
+        return;
+      }
       this._state = "error";
       this.emitter.emit("error", { error: err, stepIndex: this._currentStep });
       this.cleanup();
       this.finishRejecter(err);
       throw err;
+    } finally {
+      this.runPromise = null;
     }
   }
 
@@ -158,13 +185,15 @@ export class PlaybackController implements PlaybackControllerInterface {
       const capOpts = typeof step.caption === "string" ? { text: step.caption } : step.caption;
       let targetEl: HTMLElement | undefined;
       if (step.target) {
-        targetEl = (await this.targetResolver.resolveOptional(step.target)) || undefined;
+        targetEl =
+          (await this.targetResolver.resolveOptional(step.target, this.abortController?.signal)) ||
+          undefined;
       }
       this.spotlightEngine.showCaption(capOpts, targetEl);
     }
 
     if (step.delayBefore && step.delayBefore > 0) {
-      await new Promise(r => setTimeout(r, step.delayBefore! / this._speed));
+      await this.waitForDuration(step.delayBefore / this._speed);
     }
 
     const context: ActionExecutionContext = {
@@ -185,7 +214,7 @@ export class PlaybackController implements PlaybackControllerInterface {
     await handler.execute(context);
 
     if (step.delayAfter && step.delayAfter > 0) {
-      await new Promise(r => setTimeout(r, step.delayAfter! / this._speed));
+      await this.waitForDuration(step.delayAfter / this._speed);
     }
 
     const elapsed = Math.round(performance.now() - startTime);
@@ -225,13 +254,13 @@ export class PlaybackController implements PlaybackControllerInterface {
   }
 
   public async restart(): Promise<void> {
+    const activeRun = this.runPromise;
     this.stop();
+    if (activeRun) await activeRun.catch(() => undefined);
     this._currentStep = 0;
     this.initEngines();
-    this.finished = new Promise<void>((resolve, reject) => {
-      this.finishResolver = resolve;
-      this.finishRejecter = reject;
-    });
+    this.resetFinishedPromise();
+    this._state = "idle";
     return this.play();
   }
 
@@ -259,10 +288,42 @@ export class PlaybackController implements PlaybackControllerInterface {
     }
   }
 
+  private async waitForDuration(duration: number): Promise<void> {
+    let remaining = Math.max(0, duration);
+    while (remaining > 0 && !this.abortController?.signal.aborted) {
+      await this.waitIfPaused();
+      if (this.abortController?.signal.aborted) return;
+      const slice = Math.min(remaining, 50);
+      const startedAt = performance.now();
+      await new Promise<void>(resolve => {
+        const timer = setTimeout(resolve, slice);
+        this.abortController?.signal.addEventListener(
+          "abort",
+          () => {
+            clearTimeout(timer);
+            resolve();
+          },
+          { once: true }
+        );
+      });
+      remaining -= performance.now() - startedAt;
+    }
+  }
+
   private cleanup(): void {
+    if (!this.enginesInitialized) return;
     if (this.cursorEngine) this.cursorEngine.destroy();
+    if (this.scrollEngine) this.scrollEngine.destroy();
     if (this.spotlightEngine) this.spotlightEngine.destroy();
     if (this.a11y) this.a11y.destroy();
+    this.enginesInitialized = false;
+  }
+
+  public then<TResult1 = void, TResult2 = never>(
+    onfulfilled?: ((value: void) => TResult1 | PromiseLike<TResult1>) | null,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null
+  ): Promise<TResult1 | TResult2> {
+    return this.finished.then(onfulfilled, onrejected);
   }
 
   private log(msg: string, ...args: any[]): void {

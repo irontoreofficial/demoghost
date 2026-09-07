@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DemoGhost CDN IIFE Test</title>
+    <link rel="stylesheet" href="./demoghost.css" />
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 40px;
+        background: #0b0f19;
+        color: #fff;
+      }
+      button {
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        background: #6366f1;
+        color: #fff;
+        border: none;
+      }
+      .status {
+        margin-top: 20px;
+        font-weight: bold;
+        color: #34d399;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>CDN IIFE Verification</h1>
+    <button id="target-btn">Click Me CDN</button>
+    <div id="status" class="status">Idle</div>
+
+    <script src="./demoghost.min.js"></script>
+    <script>
+      const btn = document.getElementById("target-btn");
+      const statusEl = document.getElementById("status");
+      btn.addEventListener("click", () => {
+        statusEl.textContent = "Clicked Successfully via CDN IIFE";
+      });
+
+      // Auto-run if requested or verify window.DemoGhost exists
+      window.cdnReady = typeof window.DemoGhost !== "undefined";
+      window.runCdnDemo = function () {
+        return DemoGhost.play([DemoGhost.move("#target-btn"), DemoGhost.click("#target-btn")], {
+          controls: false,
+          speed: 2
+        });
+      };
+    </script>
+  </body>
+</html>

@@ -28,6 +28,8 @@ export class DemoGhostCore {
     registerBuiltinActions(DemoGhostCore.actions);
   }
 
+  private static activeController: PlaybackController | null = null;
+
   public static configure(config: DemoGhostConfig): void {
     DemoGhostCore.globalConfig = { ...DemoGhostCore.globalConfig, ...config };
   }
@@ -36,6 +38,15 @@ export class DemoGhostCore {
     scenarioOrSteps: DemoScenario | DemoStep[],
     options: PlaybackOptions = {}
   ): PlaybackController {
+    // Controlled cancellation: Stop previous running instance to avoid state corruption or duplicate cursors
+    if (
+      DemoGhostCore.activeController &&
+      (DemoGhostCore.activeController.state === "playing" ||
+        DemoGhostCore.activeController.state === "paused")
+    ) {
+      DemoGhostCore.activeController.stop();
+    }
+
     const scenario: DemoScenario = Array.isArray(scenarioOrSteps)
       ? { steps: scenarioOrSteps }
       : scenarioOrSteps;
@@ -52,15 +63,14 @@ export class DemoGhostCore {
       DemoGhostCore.globalEmitter
     );
 
+    DemoGhostCore.activeController = controller;
+
     if (mergedOptions.autoStart !== false) {
-      // Start asynchronously
-      setTimeout(() => {
-        controller.play().catch(err => {
-          if (mergedOptions.debug) {
-            console.error("[DemoGhost] Playback error:", err);
-          }
-        });
-      }, 0);
+      controller.play().catch(err => {
+        if (mergedOptions.debug) {
+          console.error("[DemoGhost] Playback error:", err);
+        }
+      });
     }
 
     return controller;

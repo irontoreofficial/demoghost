@@ -70,36 +70,99 @@ function calculateKeystrokeDelay(speed: TypingSpeed = "normal", deterministic = 
   }
 }
 
+function setNativeProperty(
+  element: HTMLElement,
+  property: "value" | "checked",
+  value: unknown
+): void {
+  let prototype = Object.getPrototypeOf(element);
+  while (prototype) {
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, property);
+    if (descriptor?.set) {
+      descriptor.set.call(element, value);
+      return;
+    }
+    prototype = Object.getPrototypeOf(prototype);
+  }
+  (element as any)[property] = value;
+}
+
+function dispatchValueEvents(element: HTMLElement, includeChange = false): void {
+  element.dispatchEvent(new Event("input", { bubbles: true }));
+  if (includeChange) element.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+async function waitForDuration(
+  ctx: ActionExecutionContext,
+  duration: number,
+  scaleWithPlayback = true
+): Promise<void> {
+  const playbackSpeed = scaleWithPlayback ? Math.max(0.1, Number(ctx.options.speed) || 1) : 1;
+  let remaining = Math.max(0, duration / playbackSpeed);
+
+  while (remaining > 0 && !ctx.signal.aborted) {
+    await ctx.waitIfPaused();
+    if (ctx.signal.aborted) return;
+
+    const slice = Math.min(remaining, 50);
+    const startedAt = performance.now();
+    await new Promise<void>(resolve => {
+      const onAbort = () => {
+        clearTimeout(timer);
+        resolve();
+      };
+      const timer = setTimeout(() => {
+        ctx.signal.removeEventListener("abort", onAbort);
+        resolve();
+      }, slice);
+      ctx.signal.addEventListener("abort", onAbort, { once: true });
+    });
+    remaining -= performance.now() - startedAt;
+  }
+}
+
 export function registerBuiltinActions(registry: ActionRegistry): void {
   // MOVE
   registry.register("move", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as MoveStep;
-    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex);
+    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex, ctx.signal);
     await ctx.scrollEngine.scrollIntoView(el);
 
     const targetPos = getElementCenter(el);
     ctx.cursor.setState(isInteractive(el) ? "pointer" : "default");
-    await ctx.cursor.moveTo(targetPos.x, targetPos.y, step.duration ?? 500);
+    await ctx.cursor.moveTo(
+      targetPos.x,
+      targetPos.y,
+      (step.duration ?? 500) / Math.max(0.1, Number(ctx.options.speed) || 1)
+    );
   });
 
   // CLICK
   registry.register("click", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as ClickStep;
-    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex);
+    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex, ctx.signal);
     await ctx.scrollEngine.scrollIntoView(el);
 
     const targetPos = getElementCenter(el);
     ctx.cursor.setState(isInteractive(el) ? "pointer" : "default");
     await ctx.cursor.moveTo(targetPos.x, targetPos.y, 450);
+    if (ctx.signal.aborted) return;
 
     await ctx.cursor.click(step.button ?? "left");
+    if (ctx.signal.aborted) return;
 
     // Dispatch DOM events
     el.dispatchEvent(
       new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window })
     );
     el.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }));
-    el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+    if ((step.button ?? "left") === "left") {
+      el.click();
+    } else {
+      el.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true, view: window, button: 1 })
+      );
+    }
 
     if (typeof el.focus === "function") {
       el.focus();
@@ -109,7 +172,7 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
   // DOUBLE CLICK
   registry.register("doubleClick", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as DoubleClickStep;
-    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex);
+    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex, ctx.signal);
     await ctx.scrollEngine.scrollIntoView(el);
 
     const targetPos = getElementCenter(el);
@@ -117,18 +180,22 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
     await ctx.cursor.moveTo(targetPos.x, targetPos.y, 450);
 
     await ctx.cursor.doubleClick();
+    if (ctx.signal.aborted) return;
+    el.click();
+    el.click();
     el.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, cancelable: true, view: window }));
   });
 
   // RIGHT CLICK
   registry.register("rightClick", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as RightClickStep;
-    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex);
+    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex, ctx.signal);
     await ctx.scrollEngine.scrollIntoView(el);
 
     const targetPos = getElementCenter(el);
     await ctx.cursor.moveTo(targetPos.x, targetPos.y, 450);
     await ctx.cursor.click("right");
+    if (ctx.signal.aborted) return;
 
     el.dispatchEvent(
       new MouseEvent("contextmenu", { bubbles: true, cancelable: true, view: window })
@@ -138,13 +205,14 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
   // TYPE
   registry.register("type", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as TypeStep;
-    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex);
+    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex, ctx.signal);
     await ctx.scrollEngine.scrollIntoView(el);
 
     const targetPos = getElementCenter(el);
     ctx.cursor.setState("text");
     await ctx.cursor.moveTo(targetPos.x, targetPos.y, 450);
     await ctx.cursor.click();
+    if (ctx.signal.aborted) return;
 
     if (typeof el.focus === "function") {
       el.focus();
@@ -152,31 +220,32 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
 
     const inputEl = el as HTMLInputElement | HTMLTextAreaElement;
     if (step.clearFirst && "value" in inputEl) {
-      inputEl.value = "";
-      inputEl.dispatchEvent(new Event("input", { bubbles: true }));
+      setNativeProperty(inputEl, "value", "");
+      dispatchValueEvents(inputEl);
     }
 
     const text = String(step.value || "");
-    const speed = step.speed ?? ctx.options.speed ?? "human";
+    const speed = step.speed ?? ctx.options.typingSpeed ?? "human";
     const deterministic = ctx.options.deterministic ?? false;
 
     for (let i = 0; i < text.length; i++) {
       await ctx.waitIfPaused();
+      if (ctx.signal.aborted) return;
       const char = text[i];
 
       el.dispatchEvent(new KeyboardEvent("keydown", { key: char, bubbles: true }));
       el.dispatchEvent(new KeyboardEvent("keypress", { key: char, bubbles: true }));
 
       if ("value" in inputEl) {
-        inputEl.value += char;
-        inputEl.dispatchEvent(new Event("input", { bubbles: true }));
+        setNativeProperty(inputEl, "value", inputEl.value + char);
+        dispatchValueEvents(inputEl);
       }
 
       el.dispatchEvent(new KeyboardEvent("keyup", { key: char, bubbles: true }));
 
       const delay = calculateKeystrokeDelay(speed as TypingSpeed, deterministic);
       if (delay > 0) {
-        await new Promise(r => setTimeout(r, delay));
+        await waitForDuration(ctx, delay);
       }
     }
 
@@ -188,20 +257,19 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
   // CLEAR
   registry.register("clear", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as ClearStep;
-    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex);
+    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex, ctx.signal);
     const inputEl = el as HTMLInputElement | HTMLTextAreaElement;
 
     if ("value" in inputEl) {
-      inputEl.value = "";
-      inputEl.dispatchEvent(new Event("input", { bubbles: true }));
-      inputEl.dispatchEvent(new Event("change", { bubbles: true }));
+      setNativeProperty(inputEl, "value", "");
+      dispatchValueEvents(inputEl, true);
     }
   });
 
   // FOCUS
   registry.register("focus", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as FocusStep;
-    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex);
+    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex, ctx.signal);
     await ctx.scrollEngine.scrollIntoView(el);
     if (typeof el.focus === "function") {
       el.focus();
@@ -211,7 +279,7 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
   // BLUR
   registry.register("blur", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as BlurStep;
-    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex);
+    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex, ctx.signal);
     if (typeof el.blur === "function") {
       el.blur();
     }
@@ -222,12 +290,7 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
     const step = ctx.step as WaitStep;
 
     if (step.duration) {
-      const waitTime = step.duration;
-      const start = Date.now();
-      while (Date.now() - start < waitTime) {
-        await ctx.waitIfPaused();
-        await new Promise(r => setTimeout(r, Math.min(50, waitTime - (Date.now() - start))));
-      }
+      await waitForDuration(ctx, step.duration);
       return;
     }
 
@@ -236,9 +299,10 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
       const start = Date.now();
       while (Date.now() - start < timeout) {
         await ctx.waitIfPaused();
+        if (ctx.signal.aborted) return;
         const res = await step.condition();
         if (res) return;
-        await new Promise(r => setTimeout(r, 50));
+        await waitForDuration(ctx, 50, false);
       }
       throw new DemoGhostTimeoutError("custom condition", timeout);
     }
@@ -250,7 +314,8 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
 
       while (Date.now() - start < timeout) {
         await ctx.waitIfPaused();
-        const el = document.querySelector<HTMLElement>(step.selector);
+        if (ctx.signal.aborted) return;
+        const el = await ctx.targetResolver.resolveOptional(step.selector, ctx.signal);
         if (state === "attached" && el) return;
         if (state === "detached" && !el) return;
         if (state === "visible" && el) {
@@ -258,7 +323,7 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
           if (rect.width > 0 && rect.height > 0) return;
         }
         if (state === "hidden" && (!el || el.offsetParent === null)) return;
-        await new Promise(r => setTimeout(r, 50));
+        await waitForDuration(ctx, 50, false);
       }
       throw new DemoGhostTimeoutError(`selector "${step.selector}" state "${state}"`, timeout);
     }
@@ -268,7 +333,7 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
   registry.register("scroll", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as ScrollStep;
     if (step.target) {
-      const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex);
+      const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex, ctx.signal);
       await ctx.scrollEngine.scrollIntoView(el, step.offset);
     } else if (typeof step.x === "number" || typeof step.y === "number") {
       const x = step.x ?? window.scrollX;
@@ -286,24 +351,36 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
   // SELECT
   registry.register("select", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as SelectStep;
-    const el = (await ctx.targetResolver.resolve(step.target, ctx.stepIndex)) as HTMLSelectElement;
+    const el = (await ctx.targetResolver.resolve(
+      step.target,
+      ctx.stepIndex,
+      ctx.signal
+    )) as HTMLSelectElement;
     await ctx.scrollEngine.scrollIntoView(el);
 
     const targetPos = getElementCenter(el);
     await ctx.cursor.moveTo(targetPos.x, targetPos.y, 400);
     await ctx.cursor.click();
 
-    if ("value" in el) {
-      el.value = String(step.value);
-      el.dispatchEvent(new Event("input", { bubbles: true }));
-      el.dispatchEvent(new Event("change", { bubbles: true }));
+    if (el instanceof HTMLSelectElement) {
+      const values = new Set(Array.isArray(step.value) ? step.value : [step.value]);
+      if (el.multiple) {
+        for (const option of Array.from(el.options)) option.selected = values.has(option.value);
+      } else {
+        setNativeProperty(el, "value", String(step.value));
+      }
+      dispatchValueEvents(el, true);
     }
   });
 
   // CHECK
   registry.register("check", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as CheckStep;
-    const el = (await ctx.targetResolver.resolve(step.target, ctx.stepIndex)) as HTMLInputElement;
+    const el = (await ctx.targetResolver.resolve(
+      step.target,
+      ctx.stepIndex,
+      ctx.signal
+    )) as HTMLInputElement;
     await ctx.scrollEngine.scrollIntoView(el);
 
     const targetPos = getElementCenter(el);
@@ -311,16 +388,22 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
     await ctx.cursor.click();
 
     if ("checked" in el && !el.checked) {
-      el.checked = true;
-      el.dispatchEvent(new Event("input", { bubbles: true }));
-      el.dispatchEvent(new Event("change", { bubbles: true }));
+      el.click();
+      if (!el.checked) {
+        setNativeProperty(el, "checked", true);
+        dispatchValueEvents(el, true);
+      }
     }
   });
 
   // UNCHECK
   registry.register("uncheck", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as UncheckStep;
-    const el = (await ctx.targetResolver.resolve(step.target, ctx.stepIndex)) as HTMLInputElement;
+    const el = (await ctx.targetResolver.resolve(
+      step.target,
+      ctx.stepIndex,
+      ctx.signal
+    )) as HTMLInputElement;
     await ctx.scrollEngine.scrollIntoView(el);
 
     const targetPos = getElementCenter(el);
@@ -328,16 +411,18 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
     await ctx.cursor.click();
 
     if ("checked" in el && el.checked) {
-      el.checked = false;
-      el.dispatchEvent(new Event("input", { bubbles: true }));
-      el.dispatchEvent(new Event("change", { bubbles: true }));
+      el.click();
+      if (el.checked) {
+        setNativeProperty(el, "checked", false);
+        dispatchValueEvents(el, true);
+      }
     }
   });
 
   // HOVER
   registry.register("hover", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as HoverStep;
-    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex);
+    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex, ctx.signal);
     await ctx.scrollEngine.scrollIntoView(el);
 
     const targetPos = getElementCenter(el);
@@ -352,7 +437,7 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
     );
 
     if (step.duration && step.duration > 0) {
-      await new Promise(r => setTimeout(r, step.duration));
+      await waitForDuration(ctx, step.duration);
     }
   });
 
@@ -361,7 +446,7 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
     const step = ctx.step as PressStep;
     let el = document.activeElement as HTMLElement;
     if (step.target) {
-      el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex);
+      el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex, ctx.signal);
       if (typeof el.focus === "function") el.focus();
     }
     const targetEl = el || document.body;
@@ -373,7 +458,7 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
   // HIGHLIGHT
   registry.register("highlight", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as HighlightStep;
-    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex);
+    const el = await ctx.targetResolver.resolve(step.target, ctx.stepIndex, ctx.signal);
     await ctx.scrollEngine.scrollIntoView(el);
 
     await ctx.spotlightEngine.highlight(el, {
@@ -387,11 +472,11 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
     const step = ctx.step as CaptionStep;
     let targetEl: HTMLElement | undefined;
     if (step.target) {
-      targetEl = (await ctx.targetResolver.resolveOptional(step.target)) || undefined;
+      targetEl = (await ctx.targetResolver.resolveOptional(step.target, ctx.signal)) || undefined;
     }
     ctx.spotlightEngine.showCaption(step.options, targetEl);
     if (step.options.duration) {
-      await new Promise(r => setTimeout(r, step.options.duration));
+      await waitForDuration(ctx, step.options.duration);
       ctx.spotlightEngine.hideCaption();
     }
   });
@@ -399,8 +484,8 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
   // DRAG
   registry.register("drag", async (ctx: ActionExecutionContext) => {
     const step = ctx.step as DragStep;
-    const sourceEl = await ctx.targetResolver.resolve(step.source, ctx.stepIndex);
-    const targetEl = await ctx.targetResolver.resolve(step.target, ctx.stepIndex);
+    const sourceEl = await ctx.targetResolver.resolve(step.source, ctx.stepIndex, ctx.signal);
+    const targetEl = await ctx.targetResolver.resolve(step.target, ctx.stepIndex, ctx.signal);
 
     await ctx.scrollEngine.scrollIntoView(sourceEl);
     const sourcePos = getElementCenter(sourceEl);

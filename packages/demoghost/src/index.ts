@@ -6,19 +6,19 @@ import {
   type DemoGhostConfig,
   type PlaybackEvents,
   PlaybackController
-} from "@demoghost/core";
-import { DemoGhostRecorder, EventRecorder, type RecorderOptions } from "@demoghost/recorder";
-import { DemoGhostControls } from "@demoghost/controls";
+} from "../../core/src/index";
+import { DemoGhostRecorder, EventRecorder, type RecorderOptions } from "../../recorder/src/index";
+import { DemoGhostControls } from "../../controls/src/index";
 import "./styles.css";
 
-import * as actionCreators from "@demoghost/core";
+import * as actionCreators from "../../core/src/index";
 
 // Re-export all core exports
-export * from "@demoghost/core";
+export * from "../../core/src/index";
 // Re-export recorder
-export * from "@demoghost/recorder";
+export * from "../../recorder/src/index";
 // Re-export controls
-export * from "@demoghost/controls";
+export * from "../../controls/src/index";
 
 export class DemoGhost {
   public static actions = DemoGhostCore.actions;
@@ -68,6 +68,12 @@ export class DemoGhost {
 
   public static toJavaScript(scenario: DemoScenario): string {
     return DemoGhostRecorder.toJavaScript(scenario);
+  }
+
+  public static export(scenario: DemoScenario, format: "json" | "ts" | "js" = "json"): string {
+    if (format === "ts") return DemoGhost.toTypeScript(scenario);
+    if (format === "js") return DemoGhost.toJavaScript(scenario);
+    return DemoGhost.serialize(scenario);
   }
 
   public static on<K extends keyof PlaybackEvents>(

@@ -52,4 +52,19 @@ describe("TargetResolver", () => {
     const el = await resolver.resolveOptional("#missing");
     expect(el).toBeNull();
   });
+
+  it("resolves elements located inside open Shadow DOM", async () => {
+    const host = document.createElement("div");
+    host.id = "shadow-host";
+    const shadow = host.attachShadow({ mode: "open" });
+    const innerBtn = document.createElement("button");
+    innerBtn.id = "shadow-btn";
+    innerBtn.textContent = "Inside Shadow";
+    shadow.appendChild(innerBtn);
+    document.body.appendChild(host);
+
+    const el = await resolver.resolve("#shadow-btn");
+    expect(el).not.toBeNull();
+    expect(el.id).toBe("shadow-btn");
+  });
 });

@@ -36,13 +36,13 @@ export class SelectorGenerator {
       return "";
     }
 
-    // 1. Check data-demoghost-id
+    // Tier 1: data-demoghost-id attribute
     const demoghostId = element.getAttribute("data-demoghost-id");
     if (demoghostId) {
       return `[data-demoghost-id="${CSS.escape(demoghostId)}"]`;
     }
 
-    // 2. Check unique valid ID
+    // Tier 2: Unique stable element ID
     if (element.id && this.isValidId(element.id)) {
       const idSelector = `#${CSS.escape(element.id)}`;
       if (this.isUnique(idSelector)) {
@@ -50,7 +50,7 @@ export class SelectorGenerator {
       }
     }
 
-    // 3. Preferred stable data-* attributes
+    // Tier 3: Preferred stable test-automation attributes (data-testid, data-cy, data-qa, etc.)
     for (const attr of this.preferredAttributes) {
       const val = element.getAttribute(attr);
       if (val) {
@@ -61,8 +61,8 @@ export class SelectorGenerator {
       }
     }
 
-    // 4. Semantic attributes: name, aria-label, role, placeholder
-    const semanticAttrs = ["name", "aria-label", "placeholder", "role"];
+    // Tier 4: Semantic interactive attributes: name, aria-label, placeholder, title, alt
+    const semanticAttrs = ["name", "aria-label", "placeholder", "title", "alt"];
     for (const attr of semanticAttrs) {
       const val = element.getAttribute(attr);
       if (val) {
@@ -74,13 +74,29 @@ export class SelectorGenerator {
       }
     }
 
-    // 5. Text content + tag combination for buttons / links / headings
+    // Tier 5: ARIA role + semantic tag/attribute combinations
+    const role = element.getAttribute("role");
+    if (role) {
+      const tag = element.tagName.toLowerCase();
+      const roleSel = `${tag}[role="${CSS.escape(role)}"]`;
+      if (this.isUnique(roleSel)) {
+        return roleSel;
+      }
+      const ariaLabel = element.getAttribute("aria-label");
+      if (ariaLabel) {
+        const roleWithLabel = `[role="${CSS.escape(role)}"][aria-label="${CSS.escape(ariaLabel)}"]`;
+        if (this.isUnique(roleWithLabel)) {
+          return roleWithLabel;
+        }
+      }
+    }
+
+    // Tier 6: Text content + tag combination for buttons / links / headings
     const tag = element.tagName.toLowerCase();
-    if (["button", "a", "h1", "h2", "h3", "label"].includes(tag)) {
+    if (["button", "a", "h1", "h2", "h3", "label", "span"].includes(tag)) {
       const text = (element.textContent || "").trim();
       if (text && text.length < 30 && !text.includes("\n")) {
         const textSel = `${tag}:contains("${text.replace(/"/g, '\\"')}")`;
-        // Check uniqueness via querySelector
         const matches = Array.from(document.querySelectorAll(tag)).filter(
           el => (el.textContent || "").trim() === text
         );
@@ -90,14 +106,49 @@ export class SelectorGenerator {
       }
     }
 
-    // 6. Unique class combination
+    // Tier 7: Form Control Specific Attributes (e.g. input[type="email"], button[type="submit"])
+    const inputType = element.getAttribute("type");
+    if (inputType && ["input", "button"].includes(tag)) {
+      const typeSel = `${tag}[type="${CSS.escape(inputType)}"]`;
+      if (this.isUnique(typeSel)) {
+        return typeSel;
+      }
+    }
+
+    // Tier 8: Unique clean CSS class combination
     const classSelector = this.getUniqueClassSelector(element);
     if (classSelector) {
       return classSelector;
     }
 
-    // 7. Hierarchical structural CSS path
+    // Tier 9: Contextual Ancestor Scoping (parent/container ID or form + selector)
+    const contextualSel = this.getContextualSelector(element);
+    if (contextualSel) {
+      return contextualSel;
+    }
+
+    // Tier 10: Hierarchical structural CSS path with nth-of-type fallback
     return this.getHierarchicalPath(element);
+  }
+
+  private getContextualSelector(element: HTMLElement): string | null {
+    let parent = element.parentElement;
+    while (parent && parent !== document.body && parent !== document.documentElement) {
+      if (parent.id && this.isValidId(parent.id)) {
+        const tag = element.tagName.toLowerCase();
+        const candidate = `#${CSS.escape(parent.id)} ${tag}`;
+        if (this.isUnique(candidate)) return candidate;
+
+        // Try with class if available
+        const classes = Array.from(element.classList).filter(c => !this.ignoreClasses.has(c));
+        if (classes.length > 0) {
+          const candidateWithClass = `#${CSS.escape(parent.id)} ${tag}.${CSS.escape(classes[0])}`;
+          if (this.isUnique(candidateWithClass)) return candidateWithClass;
+        }
+      }
+      parent = parent.parentElement;
+    }
+    return null;
   }
 
   private isValidId(id: string): boolean {

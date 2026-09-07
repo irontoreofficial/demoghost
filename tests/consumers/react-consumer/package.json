@@ -1,0 +1,16 @@
+{
+  "name": "consumer-react",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "demoghost": "file:../../../packages/demoghost/demoghost-1.0.0.tgz",
+    "@demoghost/react": "file:../../../packages/react/demoghost-react-1.0.0.tgz",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "typescript": "^5.7.3"
+  }
+}

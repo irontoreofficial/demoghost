@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DemoGhost Browser ESM Test</title>
+    <link rel="stylesheet" href="./demoghost.css" />
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 40px;
+        background: #0b0f19;
+        color: #fff;
+      }
+      button {
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        background: #ec4899;
+        color: #fff;
+        border: none;
+      }
+      .status {
+        margin-top: 20px;
+        font-weight: bold;
+        color: #38bdf8;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Browser ESM Verification</h1>
+    <button id="esm-btn">Click Me ESM</button>
+    <div id="esm-status" class="status">Idle</div>
+
+    <script type="module">
+      import { DemoGhost, click, move } from "./demoghost.js";
+
+      const btn = document.getElementById("esm-btn");
+      const statusEl = document.getElementById("esm-status");
+      btn.addEventListener("click", () => {
+        statusEl.textContent = "Clicked Successfully via Browser ESM CDN";
+      });
+
+      window.esmReady = typeof DemoGhost.play === "function" && typeof click === "function";
+      window.runEsmDemo = function () {
+        return DemoGhost.play([move("#esm-btn"), click("#esm-btn")], { controls: false, speed: 2 });
+      };
+    </script>
+  </body>
+</html>

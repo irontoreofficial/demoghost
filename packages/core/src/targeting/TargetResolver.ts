@@ -1,18 +1,27 @@
-import { DemoTarget, TargetResolver as ITargetResolver, TargetOptions } from "../types";
+import { DemoTarget, TargetResolverInterface, TargetOptions } from "../types";
 import { DemoGhostTargetNotFoundError } from "../errors";
 
-export class TargetResolver implements ITargetResolver {
+export class TargetResolver implements TargetResolverInterface {
   private defaultTimeout: number;
 
   constructor(defaultTimeout = 5000) {
     this.defaultTimeout = defaultTimeout;
   }
 
-  public async resolve(target: DemoTarget, stepIndex?: number): Promise<HTMLElement> {
-    const el = await this.find(target);
+  public async resolve(
+    target: DemoTarget,
+    stepIndex?: number,
+    signal?: AbortSignal
+  ): Promise<HTMLElement> {
+    const el = await this.find(target, undefined, signal);
     if (el) return el;
+    if (signal?.aborted) {
+      throw new DOMException("Playback stopped", "AbortError");
+    }
 
-    const { selector, timeout } = this.normalizeTarget(target);
+    const norm = this.normalizeTarget(target);
+    const selector = norm.selector;
+    const timeout = norm.timeout;
     throw new DemoGhostTargetNotFoundError(
       typeof selector === "string" ? selector : "<HTMLElement>",
       timeout,
@@ -20,9 +29,12 @@ export class TargetResolver implements ITargetResolver {
     );
   }
 
-  public async resolveOptional(target: DemoTarget): Promise<HTMLElement | null> {
+  public async resolveOptional(
+    target: DemoTarget,
+    signal?: AbortSignal
+  ): Promise<HTMLElement | null> {
     try {
-      return await this.find(target, 100);
+      return await this.find(target, 100, signal);
     } catch {
       return null;
     }
@@ -33,7 +45,10 @@ export class TargetResolver implements ITargetResolver {
     timeout: number;
     offset?: { x?: number; y?: number };
   } {
-    if (typeof target === "string" || target instanceof HTMLElement) {
+    if (
+      typeof target === "string" ||
+      (typeof HTMLElement !== "undefined" && target instanceof HTMLElement)
+    ) {
       return { selector: target, timeout: this.defaultTimeout };
     }
     const opts = target as TargetOptions;
@@ -44,13 +59,19 @@ export class TargetResolver implements ITargetResolver {
     };
   }
 
-  private async find(target: DemoTarget, customTimeout?: number): Promise<HTMLElement | null> {
+  private async find(
+    target: DemoTarget,
+    customTimeout?: number,
+    signal?: AbortSignal
+  ): Promise<HTMLElement | null> {
     if (typeof window === "undefined" || !document) return null;
 
-    const { selector, timeout: targetTimeout } = this.normalizeTarget(target);
-    const timeout = customTimeout ?? targetTimeout;
+    const norm = this.normalizeTarget(target);
+    const selector = norm.selector;
+    const targetTimeout = norm.timeout;
+    const timeout = customTimeout !== undefined ? customTimeout : targetTimeout;
 
-    if (selector instanceof HTMLElement) {
+    if (typeof HTMLElement !== "undefined" && selector instanceof HTMLElement) {
       return selector;
     }
 
@@ -64,13 +85,14 @@ export class TargetResolver implements ITargetResolver {
     const direct = this.querySingle(query);
     if (direct) return direct;
 
-    if (timeout <= 0) return null;
+    if (timeout <= 0 || signal?.aborted) return null;
 
     // Async waiting using MutationObserver with RAF fallback
     return new Promise<HTMLElement | null>(resolve => {
       let resolved = false;
       let timer: any = null;
       let observer: MutationObserver | null = null;
+      let frame: number | null = null;
 
       const cleanup = () => {
         resolved = true;
@@ -79,6 +101,16 @@ export class TargetResolver implements ITargetResolver {
           observer.disconnect();
           observer = null;
         }
+        if (frame !== null && typeof cancelAnimationFrame !== "undefined") {
+          cancelAnimationFrame(frame);
+          frame = null;
+        }
+        signal?.removeEventListener("abort", onAbort);
+      };
+
+      const onAbort = () => {
+        cleanup();
+        resolve(null);
       };
 
       const check = () => {
@@ -108,17 +140,29 @@ export class TargetResolver implements ITargetResolver {
 
       // Check once more in next animation frame
       if (typeof requestAnimationFrame !== "undefined") {
-        requestAnimationFrame(check);
+        frame = requestAnimationFrame(check);
       }
+
+      signal?.addEventListener("abort", onAbort, { once: true });
     });
   }
 
-  private querySingle(selector: string): HTMLElement | null {
+  public querySingle(selector: string): HTMLElement | null {
+    if (
+      selector.includes(":has-text(") ||
+      selector.includes(":contains(") ||
+      selector.startsWith("text=")
+    ) {
+      return this.queryByText(selector);
+    }
+
     try {
       // Check for exact data-demoghost-id shorthand or attribute
       if (selector.startsWith("@")) {
         const id = selector.slice(1);
-        const match = document.querySelector<HTMLElement>(`[data-demoghost-id="${id}"]`);
+        const match = document.querySelector<HTMLElement>(
+          `[data-demoghost-id="${CSS.escape(id)}"]`
+        );
         if (match) return match;
       }
 
@@ -126,29 +170,96 @@ export class TargetResolver implements ITargetResolver {
       const match = document.querySelector<HTMLElement>(selector);
       if (match) return match;
 
-      // Text search fallback if using :contains or text syntax
-      if (selector.includes(":has-text(") || selector.includes(":contains(")) {
+      // Fallback: Shadow DOM pierce traversal
+      const shadowMatch = this.pierceShadow(document.body, selector);
+      if (shadowMatch) return shadowMatch;
+    } catch {
+      // Fallback if selector has custom non-standard syntax
+      if (selector.includes(":contains(") || selector.includes(":has-text(")) {
         return this.queryByText(selector);
       }
-    } catch {
-      // Invalid selector string or unsupported pseudo-class
     }
     return null;
   }
 
   private queryByText(selector: string): HTMLElement | null {
-    const textMatch = selector.match(/:(?:has-text|contains)\(["']?(.*?)["']?\)/);
-    if (!textMatch) return null;
+    let baseSelector = "*";
+    let text = "";
+    let isExact = false;
 
-    const baseSelector = selector.split(/:(?:has-text|contains)/)[0].trim() || "*";
-    const text = textMatch[1].trim().toLowerCase();
-
-    const candidates = Array.from(document.querySelectorAll<HTMLElement>(baseSelector));
-    for (const el of candidates) {
-      if (el.textContent && el.textContent.toLowerCase().includes(text)) {
-        return el;
+    if (selector.startsWith("text=")) {
+      text = selector.slice(5).trim();
+      if (
+        (text.startsWith('"') && text.endsWith('"')) ||
+        (text.startsWith("'") && text.endsWith("'"))
+      ) {
+        text = text.slice(1, -1);
+        isExact = true;
       }
+    } else {
+      const match = selector.match(/^(.*?):(has-text|contains)\(\s*(["']?)(.*?)\3\s*\)$/i);
+      if (!match) return null;
+      baseSelector = match[1].trim() || "*";
+      const mode = match[2].toLowerCase();
+      text = match[4].replace(/\\([\\"'])/g, "$1").trim();
+      isExact = mode === "contains";
     }
+
+    if (!text) return null;
+    const lowerText = text.toLowerCase();
+
+    try {
+      const candidates = Array.from(document.querySelectorAll<HTMLElement>(baseSelector));
+      const matching: HTMLElement[] = [];
+
+      for (const el of candidates) {
+        const content = (el.textContent || "").trim();
+        if (isExact) {
+          if (content.toLowerCase() === lowerText) {
+            matching.push(el);
+          }
+        } else {
+          if (content.toLowerCase().includes(lowerText)) {
+            matching.push(el);
+          }
+        }
+      }
+
+      if (matching.length === 0) return null;
+
+      // Crucial: Select the leaf-most (deepest) matching element in the DOM tree
+      matching.sort((a, b) => {
+        if (a.contains(b)) return 1; // b is a descendant of a, so b is deeper
+        if (b.contains(a)) return -1; // a is a descendant of b, so a is deeper
+        return 0;
+      });
+
+      return matching[0] || null;
+    } catch {
+      return null;
+    }
+  }
+
+  private pierceShadow(root: ParentNode | null, selector: string): HTMLElement | null {
+    if (!root) return null;
+
+    try {
+      const match = root.querySelector<HTMLElement>(selector);
+      if (match) return match;
+    } catch {
+      // ignore
+    }
+
+    const children = Array.from(root.children || []);
+    for (const child of children) {
+      if ((child as HTMLElement).shadowRoot) {
+        const found = this.pierceShadow((child as HTMLElement).shadowRoot, selector);
+        if (found) return found;
+      }
+      const foundInChild = this.pierceShadow(child, selector);
+      if (foundInChild) return foundInChild;
+    }
+
     return null;
   }
 }

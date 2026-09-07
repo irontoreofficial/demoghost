@@ -1,0 +1,8 @@
+{
+  "name": "consumer-vanilla-js",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "demoghost": "file:../../../packages/demoghost/demoghost-1.0.0.tgz"
+  }
+}

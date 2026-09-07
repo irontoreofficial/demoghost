@@ -266,7 +266,7 @@ importers:
   packages/core: {}
 
   packages/demoghost:
-    dependencies:
+    devDependencies:
       '@demoghost/controls':
         specifier: workspace:*
         version: link:../controls
