@@ -37,17 +37,17 @@ jobs:
       - name: Lint
         run: pnpm run lint
 
+      - name: Build All Packages
+        run: pnpm run build
+
       - name: Typecheck
         run: pnpm run typecheck
 
       - name: Unit Tests
         run: pnpm run test
 
-      - name: Build All Packages
-        run: pnpm run build
-
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium firefox webkit
 
       - name: Run E2E Integration Tests
         run: pnpm run test:e2e
