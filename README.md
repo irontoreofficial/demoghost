@@ -1,3 +1,18 @@
+# DemoGhost 👻
+
+**Your UI. On autopilot.**
+
+Turn your real UI into an interactive self-playing demo.
+
+DemoGhost moves a virtual cursor through your actual DOM:
+clicking, typing, scrolling, highlighting and replaying real interactions.
+
+```bash
+npm install demoghost
+
+```md
+[Live Demo](https://irontoreofficial.github.io/demoghost/)
+
 # DemoGhost
 
 <div align="center">
