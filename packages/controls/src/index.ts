@@ -1,4 +1,4 @@
-import type { PlaybackControllerInterface, PlaybackEvents } from "@demoghost/core";
+import type { PlaybackControllerInterface, PlaybackEvents } from "@demoghostjs/core";
 import "./styles/controls.css";
 
 export interface ControlsOptions {

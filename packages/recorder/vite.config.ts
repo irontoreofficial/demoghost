@@ -17,7 +17,7 @@ export default defineConfig({
       fileName: format => `index.${format === "es" ? "js" : "cjs"}`
     },
     rollupOptions: {
-      external: ["@demoghost/core"]
+      external: ["@demoghostjs/core"]
     },
     sourcemap: true,
     minify: "esbuild"

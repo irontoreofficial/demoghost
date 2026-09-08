@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "demoghost": "workspace:*",
-    "@demoghost/react": "workspace:*",
+    "@demoghostjs/react": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

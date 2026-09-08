@@ -1,5 +1,5 @@
 {
-  "name": "@demoghost/recorder",
+  "name": "@demoghostjs/recorder",
   "version": "1.0.0",
   "description": "Smart DOM interaction recorder with privacy masking and code export for DemoGhost (0 runtime dependencies)",
   "main": "./dist/index.cjs",
@@ -16,7 +16,7 @@
     "dist"
   ],
   "dependencies": {
-    "@demoghost/core": "workspace:*"
+    "@demoghostjs/core": "workspace:*"
   },
   "scripts": {
     "build": "vite build",

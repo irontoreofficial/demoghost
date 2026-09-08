@@ -1,4 +1,4 @@
-import { DemoGhostService } from "@demoghost/angular";
+import { DemoGhostService } from "@demoghostjs/angular";
 import { click, type, wait, highlight } from "demoghost";
 import "demoghost/css";
 

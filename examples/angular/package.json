@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "demoghost": "workspace:*",
-    "@demoghost/angular": "workspace:*"
+    "@demoghostjs/angular": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.3",

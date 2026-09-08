@@ -164,7 +164,7 @@ importers:
 
   examples/angular:
     dependencies:
-      '@demoghost/angular':
+      '@demoghostjs/angular':
         specifier: workspace:*
         version: link:../../packages/angular
       demoghost:
@@ -180,7 +180,7 @@ importers:
 
   examples/react:
     dependencies:
-      '@demoghost/react':
+      '@demoghostjs/react':
         specifier: workspace:*
         version: link:../../packages/react
       demoghost:
@@ -224,7 +224,7 @@ importers:
 
   examples/vue:
     dependencies:
-      '@demoghost/vue':
+      '@demoghostjs/vue':
         specifier: workspace:*
         version: link:../../packages/vue
       demoghost:
@@ -259,7 +259,7 @@ importers:
 
   packages/controls:
     dependencies:
-      '@demoghost/core':
+      '@demoghostjs/core':
         specifier: workspace:*
         version: link:../core
 
@@ -267,13 +267,13 @@ importers:
 
   packages/demoghost:
     devDependencies:
-      '@demoghost/controls':
+      '@demoghostjs/controls':
         specifier: workspace:*
         version: link:../controls
-      '@demoghost/core':
+      '@demoghostjs/core':
         specifier: workspace:*
         version: link:../core
-      '@demoghost/recorder':
+      '@demoghostjs/recorder':
         specifier: workspace:*
         version: link:../recorder
 
@@ -298,7 +298,7 @@ importers:
 
   packages/recorder:
     dependencies:
-      '@demoghost/core':
+      '@demoghostjs/core':
         specifier: workspace:*
         version: link:../core
 

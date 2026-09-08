@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { DemoGhostProvider } from "@demoghost/react";
+import { DemoGhostProvider } from "@demoghostjs/react";
 import { App } from "./App";
 import "demoghost/css";
 

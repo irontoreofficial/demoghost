@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "demoghost": "workspace:*",
-    "@demoghost/vue": "workspace:*",
+    "@demoghostjs/vue": "workspace:*",
     "vue": "^3.5.13"
   },
   "devDependencies": {

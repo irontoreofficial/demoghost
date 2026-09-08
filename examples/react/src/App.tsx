@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDemoGhost } from "@demoghost/react";
+import { useDemoGhost } from "@demoghostjs/react";
 import { click, type, wait, highlight } from "demoghost";
 
 export const App: React.FC = () => {

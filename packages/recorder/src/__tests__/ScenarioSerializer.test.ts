@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { ScenarioSerializer } from "../serialization/ScenarioSerializer";
-import { DemoScenario } from "@demoghost/core";
+import { DemoScenario } from "@demoghostjs/core";
 
 describe("ScenarioSerializer", () => {
   const sampleScenario: DemoScenario = {

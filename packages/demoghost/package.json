@@ -24,9 +24,9 @@
     "./dist/*.css"
   ],
   "devDependencies": {
-    "@demoghost/core": "workspace:*",
-    "@demoghost/recorder": "workspace:*",
-    "@demoghost/controls": "workspace:*"
+    "@demoghostjs/core": "workspace:*",
+    "@demoghostjs/recorder": "workspace:*",
+    "@demoghostjs/controls": "workspace:*"
   },
   "scripts": {
     "build": "vite build",

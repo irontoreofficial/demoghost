@@ -14,9 +14,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@demoghost/core": path.resolve(__dirname, "packages/core/src"),
-      "@demoghost/recorder": path.resolve(__dirname, "packages/recorder/src"),
-      "@demoghost/controls": path.resolve(__dirname, "packages/controls/src"),
+      "@demoghostjs/core": path.resolve(__dirname, "packages/core/src"),
+      "@demoghostjs/recorder": path.resolve(__dirname, "packages/recorder/src"),
+      "@demoghostjs/controls": path.resolve(__dirname, "packages/controls/src"),
       demoghost: path.resolve(__dirname, "packages/demoghost/src")
     }
   }

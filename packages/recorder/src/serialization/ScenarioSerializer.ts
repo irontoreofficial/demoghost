@@ -1,4 +1,4 @@
-import type { DemoScenario, DemoStep } from "@demoghost/core";
+import type { DemoScenario, DemoStep } from "@demoghostjs/core";
 
 const BUILTIN_ACTIONS = new Set([
   "move",

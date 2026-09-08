@@ -1,4 +1,4 @@
-import type { DemoScenario, DemoStep } from "@demoghost/core";
+import type { DemoScenario, DemoStep } from "@demoghostjs/core";
 import { SelectorGenerator, SelectorOptions } from "../selector/SelectorGenerator";
 import { PrivacyMasker, PrivacyOptions } from "../privacy/PrivacyMasker";
 

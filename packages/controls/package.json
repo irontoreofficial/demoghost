@@ -1,5 +1,5 @@
 {
-  "name": "@demoghost/controls",
+  "name": "@demoghostjs/controls",
   "version": "1.0.0",
   "description": "Liquid Glass floating playback HUD controls for DemoGhost (0 runtime dependencies)",
   "main": "./dist/index.cjs",
@@ -17,7 +17,7 @@
     "dist"
   ],
   "dependencies": {
-    "@demoghost/core": "workspace:*"
+    "@demoghostjs/core": "workspace:*"
   },
   "scripts": {
     "build": "vite build",

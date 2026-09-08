@@ -1,5 +1,5 @@
 {
-  "name": "@demoghost/core",
+  "name": "@demoghostjs/core",
   "version": "1.0.0",
   "description": "Core engine for DemoGhost - Your UI. On autopilot. (0 runtime dependencies)",
   "main": "./dist/index.cjs",

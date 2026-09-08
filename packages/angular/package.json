@@ -1,5 +1,5 @@
 {
-  "name": "@demoghost/angular",
+  "name": "@demoghostjs/angular",
   "version": "1.0.0",
   "description": "Official Angular adapter for DemoGhost",
   "main": "./dist/index.cjs",

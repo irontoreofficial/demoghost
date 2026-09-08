@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useDemoGhost } from "@demoghost/vue";
+import { useDemoGhost } from "@demoghostjs/vue";
 import { click, type, wait, highlight } from "demoghost";
 
 const { play, isPlaying } = useDemoGhost();

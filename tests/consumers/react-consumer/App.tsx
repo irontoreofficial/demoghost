@@ -1,5 +1,5 @@
 import React from "react";
-import { DemoGhostProvider, useDemoGhost } from "@demoghost/react";
+import { DemoGhostProvider, useDemoGhost } from "@demoghostjs/react";
 import { click, type } from "demoghost";
 
 function DemoButton() {

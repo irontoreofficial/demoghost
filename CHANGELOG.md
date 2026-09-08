@@ -21,9 +21,9 @@ All notable changes to DemoGhost will be documented in this file.
 - **Liquid Glass Controls:**
   - Floating HUD controller with step progress, play/pause, restart, skip, close, and speed changer.
 - **Framework Adapters:**
-  - `@demoghost/react`: Context provider and `useDemoGhost()` hook.
-  - `@demoghost/vue`: Vue 3 plugin and `useDemoGhost()` composable.
-  - `@demoghost/angular`: Standalone `DemoGhostService` and `[demoGhostTarget]` directive.
+  - `@demoghostjs/react`: Context provider and `useDemoGhost()` hook.
+  - `@demoghostjs/vue`: Vue 3 plugin and `useDemoGhost()` composable.
+  - `@demoghostjs/angular`: Standalone `DemoGhostService` and `[demoGhostTarget]` directive.
 - **CDN Distribution:**
   - Pre-bundled IIFE (`demoghost.min.js`) and ESM distributions.
 - **Documentation & Playgrounds:**

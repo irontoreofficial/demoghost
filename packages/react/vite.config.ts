@@ -22,9 +22,9 @@ export default defineConfig({
         "react-dom",
         "react/jsx-runtime",
         "demoghost",
-        "@demoghost/core",
-        "@demoghost/recorder",
-        "@demoghost/controls"
+        "@demoghostjs/core",
+        "@demoghostjs/recorder",
+        "@demoghostjs/controls"
       ]
     },
     sourcemap: true,

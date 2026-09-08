@@ -259,12 +259,12 @@ DemoGhost.on("error", ({ error, stepIndex }) => console.error("Error at step", s
     title: "React Adapter",
     category: "Frameworks",
     content: `
-# @demoghost/react
+# @demoghostjs/react
 
 Official React 18 & 19 adapter:
 
 \`\`\`tsx
-import { DemoGhostProvider, useDemoGhost } from "@demoghost/react";
+import { DemoGhostProvider, useDemoGhost } from "@demoghostjs/react";
 import { click, type } from "demoghost";
 import "demoghost/css";
 
@@ -285,13 +285,13 @@ function MyComponent() {
     title: "Vue Adapter",
     category: "Frameworks",
     content: `
-# @demoghost/vue
+# @demoghostjs/vue
 
 Official Vue 3 Composition API adapter:
 
 \`\`\`ts
 import { createApp } from "vue";
-import { DemoGhostPlugin } from "@demoghost/vue";
+import { DemoGhostPlugin } from "@demoghostjs/vue";
 import "demoghost/css";
 
 const app = createApp(App);
@@ -302,7 +302,7 @@ app.mount("#app");
 In your Vue component:
 \`\`\`vue
 <script setup>
-import { useDemoGhost } from "@demoghost/vue";
+import { useDemoGhost } from "@demoghostjs/vue";
 import { click } from "demoghost";
 
 const { play, isPlaying } = useDemoGhost();
@@ -315,13 +315,13 @@ const { play, isPlaying } = useDemoGhost();
     title: "Angular Adapter",
     category: "Frameworks",
     content: `
-# @demoghost/angular
+# @demoghostjs/angular
 
 Modern standalone Angular adapter:
 
 \`\`\`ts
 import { Component } from "@angular/core";
-import { DemoGhostService, DemoGhostTargetDirective } from "@demoghost/angular";
+import { DemoGhostService, DemoGhostTargetDirective } from "@demoghostjs/angular";
 import { click, type } from "demoghost";
 
 @Component({

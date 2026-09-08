@@ -1,6 +1,6 @@
 import { EventRecorder, type RecorderOptions } from "./capture/EventRecorder";
 import { ScenarioSerializer } from "./serialization/ScenarioSerializer";
-import type { DemoScenario } from "@demoghost/core";
+import type { DemoScenario } from "@demoghostjs/core";
 
 export { EventRecorder } from "./capture/EventRecorder";
 export type { RecorderOptions } from "./capture/EventRecorder";

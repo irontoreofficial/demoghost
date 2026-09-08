@@ -1,5 +1,5 @@
 import { createApp, defineComponent, h } from "vue";
-import { DemoGhostPlugin, useDemoGhost } from "@demoghost/vue";
+import { DemoGhostPlugin, useDemoGhost } from "@demoghostjs/vue";
 import { click, wait } from "demoghost";
 
 const DemoComponent = defineComponent({

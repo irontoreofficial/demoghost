@@ -21,9 +21,9 @@ export default defineConfig({
         "@angular/core",
         "rxjs",
         "demoghost",
-        "@demoghost/core",
-        "@demoghost/recorder",
-        "@demoghost/controls"
+        "@demoghostjs/core",
+        "@demoghostjs/recorder",
+        "@demoghostjs/controls"
       ]
     },
     sourcemap: true,

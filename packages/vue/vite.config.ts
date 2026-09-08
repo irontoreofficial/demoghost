@@ -20,9 +20,9 @@ export default defineConfig({
       external: [
         "vue",
         "demoghost",
-        "@demoghost/core",
-        "@demoghost/recorder",
-        "@demoghost/controls"
+        "@demoghostjs/core",
+        "@demoghostjs/recorder",
+        "@demoghostjs/controls"
       ]
     },
     sourcemap: true,

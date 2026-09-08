@@ -1,5 +1,5 @@
 {
-  "name": "@demoghost/react",
+  "name": "@demoghostjs/react",
   "version": "1.0.0",
   "description": "Official React adapter for DemoGhost",
   "main": "./dist/index.cjs",

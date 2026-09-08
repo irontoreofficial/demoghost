@@ -4,7 +4,7 @@
   "type": "module",
   "dependencies": {
     "demoghost": "file:../../../packages/demoghost/demoghost-1.0.0.tgz",
-    "@demoghost/vue": "file:../../../packages/vue/demoghost-vue-1.0.0.tgz",
+    "@demoghostjs/vue": "file:../../../packages/vue/demoghost-vue-1.0.0.tgz",
     "vue": "^3.5.13"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 import { Component, inject } from "@angular/core";
-import { DemoGhostService, DemoGhostTargetDirective } from "@demoghost/angular";
+import { DemoGhostService, DemoGhostTargetDirective } from "@demoghostjs/angular";
 import { click, type } from "demoghost";
 
 @Component({

@@ -1,6 +1,6 @@
 {
-  "name": "@demoghost/vue",
-  "version": "1.0.0",
+  "name": "@demoghostjs/vue",
+  "version": "1.0.1",
   "description": "Official Vue 3 adapter for DemoGhost",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
