@@ -1,6 +1,6 @@
 {
   "name": "@demoghostjs/vue",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Official Vue 3 adapter for DemoGhost",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -16,7 +16,7 @@
     "dist"
   ],
   "dependencies": {
-    "demoghost": "workspace:*"
+    "demoghost": "^1.0.0"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
@@ -29,5 +29,8 @@
     "typecheck": "tsc --noEmit"
   },
   "author": "DemoGhost Team",
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
 }

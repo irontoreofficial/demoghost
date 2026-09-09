@@ -1,6 +1,6 @@
 {
   "name": "@demoghostjs/angular",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Official Angular adapter for DemoGhost",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -16,7 +16,7 @@
     "dist"
   ],
   "dependencies": {
-    "demoghost": "workspace:*"
+    "demoghost": "^1.0.0"
   },
   "peerDependencies": {
     "@angular/core": ">=16.0.0",
@@ -31,5 +31,8 @@
     "typecheck": "tsc --noEmit"
   },
   "author": "DemoGhost Team",
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
 }
