@@ -6,7 +6,7 @@ Thank you for your interest in contributing to DemoGhost!
 
 1. Clone the repository:
    \`\`\`bash
-   git clone https://github.com/demoghost/demoghost.git
+   git clone https://github.com/irontoreofficial/demoghost.git
    cd demoghost
    \`\`\`
 

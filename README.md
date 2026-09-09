@@ -14,7 +14,7 @@
 [![bundle size](https://img.shields.io/bundlephobia/minzip/demoghost?style=flat-square&color=34d399)](https://bundlephobia.com/package/demoghost)
 [![CI](https://img.shields.io/github/actions/workflow/status/irontoreofficial/demoghost/ci.yml?branch=master&style=flat-square)](https://github.com/irontoreofficial/demoghost/actions)
 
-[Live Demo & Documentation](https://irontoreofficial.github.io/demoghost/) •
+[Live Demo & Documentation](https://demoghost.dev) •
 [npm](https://www.npmjs.com/package/demoghost) •
 [Releases](https://github.com/irontoreofficial/demoghost/releases) •
 [Report a Bug](https://github.com/irontoreofficial/demoghost/issues)
@@ -582,7 +582,7 @@ DemoGhost teaches it how to perform.
 
 Full documentation, examples, and the interactive playground:
 
-### [Open DemoGhost Documentation →](https://irontoreofficial.github.io/demoghost/)
+### [Open DemoGhost Documentation →](https://demoghost.dev)
 
 Documentation includes:
 
@@ -661,7 +661,7 @@ The roadmap will evolve based on real-world usage and community feedback.
 - **React adapter:** https://www.npmjs.com/package/@demoghostjs/react
 - **Vue adapter:** https://www.npmjs.com/package/@demoghostjs/vue
 - **Angular adapter:** https://www.npmjs.com/package/@demoghostjs/angular
-- **Documentation:** https://irontoreofficial.github.io/demoghost/
+- **Documentation:** https://demoghost.dev
 - **GitHub:** https://github.com/irontoreofficial/demoghost
 - **Issues:** https://github.com/irontoreofficial/demoghost/issues
 - **Releases:** https://github.com/irontoreofficial/demoghost/releases
@@ -706,7 +706,7 @@ Copyright © DemoGhost Authors
 
 Open-source and maintained by **Irontore**.
 
-[Documentation](https://irontoreofficial.github.io/demoghost/) •
+[Documentation](https://demoghost.dev) •
 [npm](https://www.npmjs.com/package/demoghost) •
 [GitHub](https://github.com/irontoreofficial/demoghost)
 
