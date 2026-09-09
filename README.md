@@ -6,17 +6,18 @@
 
 ### Your UI. On autopilot.
 
-**Turn your real UI into an interactive self-playing demo.**
+**Open-source JavaScript & TypeScript UI automation for interactive product demos, user onboarding, product tours, and self-playing interfaces.**
 
 [![npm version](https://img.shields.io/npm/v/demoghost.svg?style=flat-square&color=6366f1)](https://www.npmjs.com/package/demoghost)
+[![npm downloads](https://img.shields.io/npm/dm/demoghost.svg?style=flat-square)](https://www.npmjs.com/package/demoghost)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/demoghost?style=flat-square&color=34d399)](https://bundlephobia.com/package/demoghost)
 [![CI](https://img.shields.io/github/actions/workflow/status/irontoreofficial/demoghost/ci.yml?branch=master&style=flat-square)](https://github.com/irontoreofficial/demoghost/actions)
 
-[Live Demo & Playground](https://demoghost.dev) •
-[Documentation](https://demoghost.dev) •
+[Live Demo & Documentation](https://irontoreofficial.github.io/demoghost/) •
 [npm](https://www.npmjs.com/package/demoghost) •
-[Report Bug](https://github.com/irontoreofficial/demoghost/issues)
+[Releases](https://github.com/irontoreofficial/demoghost/releases) •
+[Report a Bug](https://github.com/irontoreofficial/demoghost/issues)
 
 </div>
 
@@ -26,21 +27,31 @@
 
 **DemoGhost** is an open-source JavaScript/TypeScript library that lets your web application **demonstrate itself directly on the real DOM**.
 
-Instead of recording a video or placing tooltip boxes around the page, DemoGhost creates a virtual user that can:
+Instead of recording a video, exporting a GIF, or building a traditional tooltip tour, DemoGhost creates a virtual user that can move through your actual interface and perform real UI interactions.
+
+It can:
 
 - move a virtual cursor
 - click real elements
 - type into real inputs
 - scroll the real page
-- highlight UI elements
-- show captions
-- pause and continue
+- highlight important UI
+- display captions
+- pause and resume playback
 - record interactions
-- replay scenarios
+- replay reusable scenarios
 
-Your interface stays **real, responsive and interactive**.
+Your interface stays **real, responsive, searchable, localizable, and interactive**.
 
 ```ts
+import {
+  DemoGhost,
+  click,
+  type,
+  wait,
+  highlight
+} from "demoghost";
+
 await DemoGhost.play([
   click("#new-project"),
   type("#project-name", "Launch Website"),
@@ -54,19 +65,19 @@ await DemoGhost.play([
 
 ## Why DemoGhost?
 
-Traditional product demos usually fall into one of these categories:
+Product demos usually rely on prerecorded media or intrusive overlays.
 
-| Approach | Problem |
+DemoGhost takes a different approach: it operates directly on the application that is already running.
+
+| Approach | Limitation |
 | --- | --- |
-| 🎥 Video | Becomes outdated when the interface changes |
-| 🖼 GIF | Non-interactive and difficult to maintain |
-| 💬 Tooltip tour | Interrupts the user with overlays and popups |
-| 🧪 Playwright / Selenium | Designed primarily for automated testing |
-| 👻 **DemoGhost** | Operates directly on your live interface |
+| 🎥 Video | Becomes outdated when the UI changes |
+| 🖼 GIF | Non-interactive, heavy, and difficult to maintain |
+| 💬 Tooltip tour | Often interrupts users with overlays and popups |
+| 🧪 Playwright / Selenium | Built primarily for test automation and CI |
+| 👻 **DemoGhost** | Demonstrates the real UI in the browser |
 
-DemoGhost does not reproduce your interface.
-
-**It uses your actual interface.**
+**DemoGhost does not recreate your interface. It uses your actual interface.**
 
 ---
 
@@ -93,7 +104,7 @@ import {
 import "demoghost/css";
 ```
 
-### 3. Create your first demo
+### 3. Create your first self-playing demo
 
 ```ts
 await DemoGhost.play([
@@ -123,90 +134,53 @@ await DemoGhost.play([
 
 That's it.
 
-Your interface now demonstrates itself.
+Your real interface can now demonstrate itself.
 
 ---
 
-## Record + Replay
+## Record and Replay
 
 ### Do it once. DemoGhost does it forever.
 
-You can record real interactions and turn them into reusable DemoGhost scenarios.
+DemoGhost can record real UI interactions and turn them into reusable scenarios.
 
 ```ts
 import { DemoGhost } from "demoghost";
 
-// Start recording
 const recorder = DemoGhost.record({
   maskPasswords: true
 });
 
-// Use your application normally...
-// Click buttons, fill forms, select items, etc.
+// Use your application normally.
 
-// Stop recording
 const scenario = recorder.stop();
 
-// Replay the recorded scenario
 await DemoGhost.play(scenario);
 ```
 
-You can also export the scenario as code:
+Export recorded scenarios as TypeScript:
 
 ```ts
-const typescriptCode = DemoGhost.toTypeScript(scenario);
-
-console.log(typescriptCode);
+const code = DemoGhost.toTypeScript(scenario);
+console.log(code);
 ```
 
-Or:
+Or JavaScript:
 
 ```ts
-const javascriptCode = DemoGhost.toJavaScript(scenario);
-
-console.log(javascriptCode);
+const code = DemoGhost.toJavaScript(scenario);
+console.log(code);
 ```
 
-This makes it possible to:
+This is useful for:
 
-- record onboarding flows
-- capture feature demonstrations
-- generate reproducible tutorials
-- create product walkthroughs
-- build interactive documentation
-
----
-
-## Example Scenario
-
-Imagine a project management application.
-
-Instead of recording a video showing how to create a project:
-
-```ts
-await DemoGhost.play([
-  click("#projects"),
-
-  click("#new-project"),
-
-  type("#project-name", "Website Redesign"),
-
-  type(
-    "#project-description",
-    "Redesign the company website"
-  ),
-
-  click("#save-project"),
-
-  wait(500),
-
-  highlight("#project-card")
-]);
-```
-
-If the application layout changes later, you do not need to record an entirely new video.
-
-DemoGhost still interacts with the real interface.
+- product onboarding
+- SaaS walkthroughs
+- interactive documentation
+- feature announcements
+- support flows
+- software education
+- internal tool guidance
 
 ---
 
@@ -218,34 +192,27 @@ Actions target real DOM elements:
 
 ```ts
 click("#submit");
-```
-
-```ts
 type("#email", "hello@example.com");
-```
-
-```ts
 highlight("[data-demo='profile']");
 ```
 
-This means demos can continue to work with:
+Because DemoGhost works against the live DOM, demos can work with:
 
 - responsive layouts
 - dynamic content
-- live application state
-- CSS animations
-- frontend frameworks
 - real form elements
+- live application state
+- CSS transitions and animations
+- client-side frameworks
+- server-rendered applications
 
 ---
 
 ## Durable Selectors
 
-UI automation becomes fragile when selectors depend on generated CSS classes or screen coordinates.
+UI automation becomes fragile when it depends on generated CSS classes, coordinates, or temporary DOM structure.
 
-DemoGhost uses a selector strategy designed for durable demos.
-
-Whenever possible, prefer explicit DemoGhost identifiers:
+For long-lived demos, prefer stable selectors:
 
 ```html
 <button data-demoghost-id="create-project">
@@ -253,38 +220,37 @@ Whenever possible, prefer explicit DemoGhost identifiers:
 </button>
 ```
 
-Then target them normally:
+Then target the element normally:
 
 ```ts
 click('[data-demoghost-id="create-project"]');
 ```
 
-DemoGhost can also work with:
+DemoGhost can work with selector strategies based on:
 
-```html
-id
-data-testid
-aria-label
-name
-semantic attributes
-text-based matches
-```
+- `data-demoghost-id`
+- `id`
+- `data-testid`
+- semantic attributes
+- `aria-label`
+- `name`
+- text-based matching
 
-Explicit selectors are recommended for long-lived production demos.
+For production demos, explicit stable selectors are recommended.
 
 ---
 
 ## Privacy by Default
 
-Recording UI interactions can involve sensitive information.
+Recording UI interactions can expose sensitive values if a library is not designed carefully.
 
-DemoGhost includes privacy-oriented recording behavior for fields such as:
+DemoGhost includes privacy-oriented recording behavior for sensitive inputs such as:
 
 ```html
 <input type="password">
 ```
 
-and supports masking sensitive input values.
+Password masking can be enabled when recording:
 
 ```ts
 const recorder = DemoGhost.record({
@@ -300,18 +266,18 @@ Your demo logic can remain inside your application.
 
 ## Accessibility
 
-DemoGhost is designed to respect the user's environment.
+DemoGhost is designed to respect the user's environment and interaction preferences.
 
-Features include:
+Accessibility-oriented features include:
 
 - `prefers-reduced-motion` support
 - keyboard controls
 - screen reader announcements
 - `aria-live` notifications
 - interruptible playback
-- accessible UI controls
+- accessible playback controls
 
-Typical controls include:
+Typical keyboard controls include:
 
 ```text
 Escape → Stop demo
@@ -320,11 +286,11 @@ Space  → Pause / Resume
 
 ---
 
-## Natural Motion
+## Natural Cursor Motion
 
-DemoGhost's virtual cursor is designed to feel like a person operating the interface rather than an automation script instantly teleporting between elements.
+A self-playing interface should not feel like a test script teleporting between elements.
 
-Cursor movement can include:
+DemoGhost's virtual cursor is designed to create more natural visual movement through:
 
 - curved trajectories
 - acceleration
@@ -333,21 +299,21 @@ Cursor movement can include:
 - smooth scrolling
 - human-style typing cadence
 
-The goal is not simply to automate the page.
+The goal is not only to automate the UI.
 
-The goal is to create a demo that is pleasant to watch.
+The goal is to create a product demo that is pleasant to watch.
 
 ---
 
 ## Framework Independent
 
-The main package works directly with the DOM.
+The main package works directly with the DOM:
 
 ```bash
 npm install demoghost
 ```
 
-So DemoGhost can be used with:
+That means DemoGhost can be used with:
 
 - Vanilla JavaScript
 - TypeScript
@@ -363,27 +329,25 @@ So DemoGhost can be used with:
 - Rails
 - traditional server-rendered applications
 
-No framework adapter is required to use the core library.
+No framework adapter is required to use the core `demoghost` package.
 
 ---
 
 ## Framework Adapters
 
-Dedicated adapters are also maintained in the DemoGhost repository:
-
-```text
-packages/react
-packages/vue
-packages/angular
-```
-
-They provide framework-specific APIs such as:
+Official DemoGhost framework adapters are available on npm.
 
 ### React
 
-```ts
-useDemoGhost()
+```bash
+npm install demoghost @demoghostjs/react
 ```
+
+```ts
+import { useDemoGhost } from "@demoghostjs/react";
+```
+
+The React adapter also provides:
 
 ```tsx
 <DemoGhostProvider>
@@ -391,64 +355,49 @@ useDemoGhost()
 </DemoGhostProvider>
 ```
 
-### Vue
+Package: [`@demoghostjs/react`](https://www.npmjs.com/package/@demoghostjs/react)
+
+### Vue 3
+
+```bash
+npm install demoghost @demoghostjs/vue
+```
 
 ```ts
-useDemoGhost()
+import { useDemoGhost } from "@demoghostjs/vue";
 ```
+
+The Vue adapter also includes:
 
 ```ts
 DemoGhostPlugin
 ```
 
+Package: [`@demoghostjs/vue`](https://www.npmjs.com/package/@demoghostjs/vue)
+
 ### Angular
 
-```ts
-DemoGhostService
+```bash
+npm install demoghost @demoghostjs/angular
 ```
+
+```ts
+import { DemoGhostService } from "@demoghostjs/angular";
+```
+
+The Angular adapter also includes:
 
 ```ts
 DemoGhostTargetDirective
 ```
 
-> Framework adapter npm packages will be published separately.
-
-The main `demoghost` package remains framework-independent.
+Package: [`@demoghostjs/angular`](https://www.npmjs.com/package/@demoghostjs/angular)
 
 ---
 
-## Browser Usage
+## TypeScript Support
 
-DemoGhost also ships browser-ready builds inside the npm package.
-
-Package files include:
-
-```text
-dist/demoghost.js
-dist/demoghost.min.js
-dist/demoghost.css
-```
-
-CDN providers may require a short propagation period after a new npm release.
-
-For production applications, pin the DemoGhost version instead of relying on `latest`.
-
-Example structure:
-
-```html
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/demoghost@1.0.0/dist/demoghost.css"
-/>
-
-<script src="https://cdn.jsdelivr.net/npm/demoghost@1.0.0/dist/demoghost.min.js"></script>
-```
-
----
-
-## TypeScript
-
-DemoGhost is written with TypeScript support in mind and ships type declarations with the package.
+DemoGhost ships TypeScript declaration files with the package.
 
 ```ts
 import {
@@ -463,41 +412,121 @@ No separate `@types` package is required.
 
 ---
 
-## Package Formats
+## Browser Builds
 
-DemoGhost ships multiple builds:
+The main npm package includes browser-ready builds:
 
 ```text
-ESM
-CommonJS
-IIFE / Browser
-TypeScript declarations
-CSS
+dist/demoghost.js
+dist/demoghost.min.js
+dist/demoghost.css
 ```
 
-Example:
+It also ships:
 
-```ts
-import { DemoGhost } from "demoghost";
-```
+- ESM
+- CommonJS
+- browser/IIFE build
+- TypeScript declarations
+- CSS
 
-And CSS:
-
-```ts
-import "demoghost/css";
-```
+For production deployments, pin the DemoGhost version you have tested.
 
 ---
 
 ## Zero Runtime Dependencies
 
-The DemoGhost core package is designed to remain lightweight and self-contained.
+The main DemoGhost package is designed to stay lightweight and self-contained.
 
 ```text
 Runtime dependencies: 0
 ```
 
-This helps keep installation simple and reduces dependency-chain risk.
+This keeps installation simple and reduces dependency-chain risk.
+
+---
+
+## Browser Support
+
+DemoGhost is tested against modern browser engines.
+
+| Browser | Support |
+| --- | :---: |
+| Chrome / Chromium | ✅ |
+| Firefox | ✅ |
+| Safari / WebKit | ✅ |
+| Mobile Chrome | ✅ |
+| Mobile Safari | ✅ |
+
+---
+
+## Shadow DOM and Iframes
+
+DemoGhost can interact with modern application structures where the browser security model permits it.
+
+Supported:
+
+```text
+Open Shadow DOM
+Same-origin iframes
+```
+
+Browser security prevents normal page JavaScript from accessing:
+
+```text
+Closed Shadow DOM
+Cross-origin iframes
+```
+
+These are browser platform restrictions rather than DemoGhost-specific limitations.
+
+---
+
+## Use Cases
+
+### Product Onboarding
+Show new users how to complete an important first action directly inside your application.
+
+### Interactive Product Demos
+Turn a live SaaS interface into a self-playing product demonstration without recording a new video after every UI change.
+
+### Product Tours
+Create walkthroughs that interact with the real application instead of only pointing at elements.
+
+### Feature Announcements
+Demonstrate newly released features in the context where users will actually use them.
+
+### Interactive Documentation
+Let documentation pages demonstrate real application workflows.
+
+### Customer Support
+Replay common configuration, setup, and troubleshooting flows.
+
+### Education
+Demonstrate software interfaces without depending on prerecorded media.
+
+### Internal Tools
+Create guided workflows for complex dashboards and administration panels.
+
+---
+
+## DemoGhost vs Traditional Product Tours
+
+A traditional product tour says:
+
+> "Click this button."
+
+DemoGhost can click it.
+
+A traditional tooltip says:
+
+> "Enter your project name here."
+
+DemoGhost can type it.
+
+A prerecorded video shows what the interface looked like when the video was recorded.
+
+DemoGhost demonstrates the interface that is running now.
 
 ---
 
@@ -535,121 +564,27 @@ The public `demoghost` package combines the pieces required by most consumers in
 
 ---
 
-## Browser Support
-
-DemoGhost is tested against modern browsers including:
-
-| Browser | Support |
-| --- | :---: |
-| Chrome / Chromium | ✅ |
-| Firefox | ✅ |
-| Safari / WebKit | ✅ |
-| Mobile Chrome | ✅ |
-| Mobile Safari | ✅ |
-
----
-
-## Shadow DOM & Iframes
-
-DemoGhost supports interaction with modern application structures where browser security permits it.
-
-Supported:
-
-```text
-Open Shadow DOM
-Same-origin iframes
-```
-
-Browser security prevents JavaScript libraries from accessing:
-
-```text
-Closed Shadow DOM
-Cross-origin iframes
-```
-
-These are browser platform limitations rather than DemoGhost-specific restrictions.
-
----
-
-## Use Cases
-
-DemoGhost can be used for:
-
-### Product onboarding
-
-Show users how to perform their first important action.
-
-### Feature announcements
-
-Demonstrate a newly released feature directly inside the application.
-
-### Interactive documentation
-
-Let documentation pages demonstrate real workflows.
-
-### SaaS demos
-
-Create self-running demonstrations without maintaining recorded videos.
-
-### Support
-
-Replay common troubleshooting or configuration steps.
-
-### Education
-
-Demonstrate how software interfaces work without requiring prerecorded media.
-
-### Internal tools
-
-Create guided workflows for complex administration panels.
-
----
-
-## DemoGhost vs Product Tours
-
-A traditional product tour usually says:
-
-> "Click this button."
-
-DemoGhost can actually click it.
-
-A traditional tooltip says:
-
-> "Enter your project name here."
-
-DemoGhost can type it.
-
-A video shows:
-
-> what somebody did yesterday.
-
-DemoGhost shows:
-
-> what your real interface does right now.
-
----
-
 ## Philosophy
 
 DemoGhost is built around one simple idea:
 
 > **Your interface should be able to explain itself.**
 
-A product demo should not need to become outdated every time a button moves or a design changes.
+A product demo should not need to be rerecorded every time a button moves, a layout changes, or a feature evolves.
 
 The interface is already there.
 
-DemoGhost simply teaches it how to perform.
+DemoGhost teaches it how to perform.
 
 ---
 
-## Documentation
+## Documentation and Playground
 
-Full documentation, examples and the interactive playground:
+Full documentation, examples, and the interactive playground:
 
-### → [Open DemoGhost Documentation](https://demoghost.dev)
+### [Open DemoGhost Documentation →](https://irontoreofficial.github.io/demoghost/)
 
-The documentation includes:
+Documentation includes:
 
 - Getting Started
 - Playback API
@@ -659,41 +594,19 @@ The documentation includes:
 - Privacy
 - Accessibility
 - Framework integrations
-- CDN usage
-- Examples
-- Interactive playground
+- browser usage
+- examples
+- interactive playground
 
 ---
 
 ## Development
 
-Clone the repository:
-
 ```bash
 git clone https://github.com/irontoreofficial/demoghost.git
-```
-
-Enter the project:
-
-```bash
 cd demoghost
-```
-
-Install dependencies:
-
-```bash
 pnpm install
-```
-
-Build the project:
-
-```bash
 pnpm build
-```
-
-Run tests:
-
-```bash
 pnpm test
 ```
 
@@ -709,17 +622,18 @@ pnpm --filter demoghost-docs dev
 
 Contributions are welcome.
 
-If you would like to:
+You can help by:
 
-- report a bug
-- propose a feature
-- improve documentation
-- add an example
-- improve framework support
+- reporting bugs
+- proposing features
+- improving documentation
+- adding examples
+- improving framework integrations
+- testing DemoGhost in real applications
 
-open an issue or submit a pull request.
+### [Open an Issue →](https://github.com/irontoreofficial/demoghost/issues)
 
-### → [Open an Issue](https://github.com/irontoreofficial/demoghost/issues)
+Pull requests are welcome.
 
 ---
 
@@ -727,11 +641,11 @@ open an issue or submit a pull request.
 
 DemoGhost v1 establishes the foundation for self-playing UI demonstrations.
 
-Future areas of development may include:
+Future development may include:
 
-- additional recorder capabilities
+- richer recorder capabilities
 - improved selector resilience
-- richer playback controls
+- advanced playback controls
 - framework-specific developer experience
 - more examples and templates
 - additional demo authoring tools
@@ -744,10 +658,30 @@ The roadmap will evolve based on real-world usage and community feedback.
 ## Project Links
 
 - **npm:** https://www.npmjs.com/package/demoghost
-- **Documentation:** https://demoghost.dev
+- **React adapter:** https://www.npmjs.com/package/@demoghostjs/react
+- **Vue adapter:** https://www.npmjs.com/package/@demoghostjs/vue
+- **Angular adapter:** https://www.npmjs.com/package/@demoghostjs/angular
+- **Documentation:** https://irontoreofficial.github.io/demoghost/
 - **GitHub:** https://github.com/irontoreofficial/demoghost
 - **Issues:** https://github.com/irontoreofficial/demoghost/issues
 - **Releases:** https://github.com/irontoreofficial/demoghost/releases
+
+---
+
+## Search Keywords
+
+`javascript ui automation` •
+`typescript ui automation` •
+`interactive product demo` •
+`self playing ui` •
+`product tour` •
+`user onboarding` •
+`saas demo` •
+`dom automation` •
+`interactive documentation` •
+`react product tour` •
+`vue product tour` •
+`angular product tour`
 
 ---
 
@@ -772,7 +706,7 @@ Copyright © DemoGhost Authors
 
 Open-source and maintained by **Irontore**.
 
-[Documentation](https://demoghost.dev) •
+[Documentation](https://irontoreofficial.github.io/demoghost/) •
 [npm](https://www.npmjs.com/package/demoghost) •
 [GitHub](https://github.com/irontoreofficial/demoghost)
 
